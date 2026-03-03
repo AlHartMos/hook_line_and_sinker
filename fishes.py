@@ -5,30 +5,18 @@ trash = []
 
 class Catch:
 
-    def __init__(self, name, item_type, fish_images, energy, mutation_score):
+    def __init__(self, name, isFish: bool, fish_images, energy: list, mutation_score: list):
         self.name = name # Name of the fish caught
-        self.item_type = item_type
+        self.isFish = isFish
+        self.isTrash = not isFish
         self.images = fish_images # List of the names of the fish assets for their base and mutated forms
         self.energy = energy # List of the amount of energy they give the player when eaten based on their mutation level
         self.mutation_score = mutation_score # List of how much each fish contributes to the player's mutation score based on their mutation level
-        if self.item_type == "trash":
+        if self.isTrash:
             trash.append(self.name)
-        elif self.item_type == "fish":
+        else:
             fish.append(self.name)
-    
-    def eaten(self, level):
-        # How much energy they give the player when eaten based on the level of mutation
-        if level in range(len(self.energy)):
-            return self.energy[level]
-        else:
-            raise ValueError("Mutation level too high")
 
-    def mutate(self, level):
-        # How mutation points to give the player based on the level of mutation
-        if level in range(len(self.mutation_score)):
-            return self.mutation_score[level]
-        else:
-            raise ValueError("Mutation level too high")
 
 class Location ():
 
@@ -52,10 +40,11 @@ locations = {
     4: Location(4, "Lighthouse", [0.01, 0.99], [0.2, 0.2, 0.3, 0.3, 0.0]),
     5: Location(5, "Cave", [0.0, 1.0], [0.0, 0.05, 0.05, 0.1, 0.8])
 }
+
 # Defining the different catchable items
-minnow = Catch("Minnow", "fish", None, [1, 1.5, 2, 3, 5], [0, 1, 2, 3, 4])
-perch = Catch("Perch", "fish", None, [3, 3.5, 5, 6, 8], [0, 1, 3, 5, 8])
-pike = Catch("Pike", "fish", None, [3, 3.5, 5, 6, 8], [0, 1, 3, 5, 8])
-catfish = Catch("Catfish", "fish", None, [7, 8, 10, 12, 15], [0, 2, 6, 10, 15])
-weeds = Catch("Lake Weed Cluster", "trash", None, [0.5], [0])
+minnow = Catch("Minnow", True, None, [1, 1.5, 2, 3, 5], [0, 1, 2, 3, 4])
+perch = Catch("Perch", True, None, [3, 3.5, 5, 6, 8], [0, 1, 3, 5, 8])
+pike = Catch("Pike", True, None, [3, 3.5, 5, 6, 8], [0, 1, 3, 5, 8])
+catfish = Catch("Catfish", True, None, [7, 8, 10, 12, 15], [0, 2, 6, 10, 15])
+weeds = Catch("Lake Weed Cluster", False, None, [0.5], [0])
 
