@@ -8,25 +8,25 @@ class GameState:
     def __init__(self, game):
         self.game = game
 
-    # Called when the state first becomes active (used to trigger NPC interactions)
     def enter(self):
+        # Called when the state first becomes active (used to trigger NPC interactions)
         pass
 
-    # Called when the state is about to become inactive
     def exit(self):
+        # Called when the state is about to become inactive
         pass
 
-    # Handles input events like key presses, mouse clicks, and quitting the game
-    # Sets which inputs are allowed
     def handle_event(self, event):
+        # Handles input events like key presses, mouse clicks, and quitting the game
+        # Sets which inputs are allowed
         pass
 
-    # Update state as time progresses
-    # Sets how if/how time progresses in this state
     def update(self, dt):
+        # Update state as time progresses
+        # Sets how if/how time progresses in this state
         pass
 
-    # Draws the current state of the screen
-    # Place backgrounds, NPC portraits, UI, dialogue...
     def draw(self, screen):
+        # Draws the current state of the screen
+        # Place backgrounds, NPC portraits, UI, dialogue...
         pass
