@@ -1,4 +1,5 @@
 import pygame
+from locations import tutorial
 
 # Game is the central controller for the whole game
     # Creates: window, clock
@@ -22,7 +23,6 @@ class Game:
         self.save_data = SaveData() # Get data for user
 
         self.state_stack = [] # Allows for different states to be used simultaneously (good for popups)
-        # ********** TODO: Add introductory popup to FreeState **************
         self.push_state(FreeState(self)) # Starts the game in FreeState
 
     # Recieve top state to work with the current state easily
@@ -76,8 +76,9 @@ class Game:
 # Save data about the player as they progress through the game
 class SaveData:
     def __init__(self):
-        self.location = "tutorial" # Set current location
+        self.current_location = tutorial # Set current location
         self.flags = set() # list of things that have happened for story logic later on
         self.cooler = [] # List of fish in the cooler
         self.mutation_level = 0 # Mutation level of the players
         self.energy = 100 # Current energy level
+

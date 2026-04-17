@@ -1,4 +1,5 @@
 import numpy as np
+from fishes import fish
 
 class Location ():
 
@@ -11,7 +12,11 @@ class Location ():
 
     def mutation_level(self):
         # Returns the mutation level based on the current location
-        return np.random.choice(5, p = self.mutation_rates)
+        return np.random.choice([0, 1, 2, 3, 4], p = self.mutation_rates)
+    
+    def trash_or_fish(self):
+        # Returns zero if Fish and one if Trash
+        return np.random.choice([0, 1], self.trash_fish_ratio)
     
 # Defining the locations in a dictionary for easy access to data when designing the game
 tutorial = Location(0, "Tutorial", [0.7, 0.3], [1.0, 0.0, 0.0, 0.0, 0.0], "assets/Tutorial_Area.png")
