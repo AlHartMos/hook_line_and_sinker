@@ -82,6 +82,17 @@ class SaveData:
         self.flags = set() # list of things that have happened for story logic later on
         self.cooler = [] # List of caught fish records with mutation info        self.mutation_level = 0 # Mutation level of the players
         self.energy = 100 # Current energy level
+
+        # Cooler data
+        def _cooler_capacity(self):
+        # Base capacity is 16
+            capacity = 16
+
+            # Upgrade doubles capacity
+            if "purchased_extra_cooler" in self.game.save_data.flags:
+                capacity = 32
+
+            return capacity
          
         # Used by FreeState to show a one-time system popup after another state finishes.
         self.pending_popup = None
@@ -91,5 +102,11 @@ class SaveData:
         self.tutorial_first_trash_popup_shown = False
         self.tutorial_second_trash_popup_shown = False
         self.tutorial_third_trash_popup_shown = False
+
+        # Lake Area progression
+        self.lake_fish_caught = 0
+        self.lake_first_fish_popup_shown = False
+        self.lake_second_fish_popup_shown = False
+        self.lake_third_fish_popup_shown = False
 
 

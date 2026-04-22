@@ -303,11 +303,84 @@ meeting_bertha = {
     # TO BE COMPLETED
     "bertha_end": [
         Dialogue(
+            player,
+            "Half an hour or so later you are no longer feeling like a wet puppy.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "The tea that Bertha made for you out of strange herbs that were growing around here was reminding you of white tea, only with a slight aftertaste of raspberry.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "Truly unexpected combination.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "Bertha wasn’t paying too much attention to you anymore, doing something with playing cards on the main table.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "You appreciated her kindness a lot and yet felt as if you were overstaying welcome, which of course she will never admit, yet you were gentleman enough to know it.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "You got out of an armchair carefully securing the plaid of the spot where you were sitting.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "Said your thanks to her and went to the exit door.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "She responded with the same kind smile as usual and once you opened the door let out.",
+            kind="thought"
+        ),
+        Dialogue(
             bertha,
-            "That is fine. You do not have to ask everything at once.",
+            "Listen… I have a deal for you.",
             kind="npc"
+        ),
+        Dialogue(
+            player,
+            "You paused in one place and turned to look at her.",
+            kind="thought"
+        ),
+        Dialogue(
+            bertha,
+            "I see you are a very nice person, much more let’s say accessible than others here, and I’m already a bit old for all the grappling through the water and catching the fish for food. So…",
+            kind="npc"
+        ),
+        Dialogue(
+            bertha,
+            "If you would be so kind, when you’ll have time, get me some of it, and I promise I’ll find something good for you too. Afterall have to get used to each other.",
+            kind="npc"
+        ),
+        Dialogue(
+            player,
+            "Your head nodded to her request earlier than you got to realize what she said.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "With that you got back outside, into the pitch black surrounding with bare light hitting from far above.",
+            kind="thought"
+        ),
+        Dialogue(
+            player,
+            "You can visit her later, once you have some fish to trade.",
+            kind="thought",
+            next_node="end"
         )
-    ]
+    ],
+
+    "end": []
 }
 
 

@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 
 from states.base_state import GameState
-from fishes import fish, trash, minnow, perch, pike, catfish
+from fishes import trash, minnow, perch, pike, catfish
 
 
 class FishingState(GameState):
@@ -65,7 +65,7 @@ class FishingState(GameState):
             self.title_font = pygame.font.SysFont(None, 54)
             self.body_font = pygame.font.SysFont(None, 34)
             self.button_font = pygame.font.SysFont(None, 30)
-            self.small_font = pygame.font.SysFont(None, 24)
+        self.small_font = pygame.font.SysFont(None, 24)
 
     def exit(self):
         return super().exit()
@@ -125,21 +125,18 @@ class FishingState(GameState):
 
     def _handle_progression(self):
         # Location-specific progression dispatcher.
-        # As the game grows, each location can get its own helper here.
         if self.location is None:
             return
 
         if self.location.id == 0:
             self._handle_tutorial_progression()
-
-        # Example for later:
-        # elif self.location.id == 1:
-        #     self._handle_lake_progression()
+        elif self.location.id == 1:
+             self._handle_lake_progression()
 
     def _handle_tutorial_progression(self):
         # Tutorial progression only happens when the player catches trash.
         # This teaches the player the fishing loop and unlocks the next area.
-        if not self.catch.isTrash:
+        if self.catch.isFish:
             return
 
         self.game.save_data.tutorial_trash_caught += 1
@@ -170,12 +167,58 @@ class FishingState(GameState):
         ):
             self._queue_popup(
                 "Tutorial",
-                "Three trash catches! You can move on now."
+                "With your luck being on its lowest you decide to move along the lake further. Maybe in some other place you’ll be in luck"
             )
             self.game.save_data.tutorial_third_trash_popup_shown = True
 
             # This is the progression flag FreeState checks to show the next-location button.
             self.game.save_data.flags.add("three_trash_caught")
+
+    def _handle_lake_progression(self):
+    # Lake progression only happens when the player catches fish.
+    # This teaches the player the fishing loop, hints at mutation, and unlocks the next area.
+        if self.catch.isTrash:
+            return
+        
+        self.game.save_data.lake_fish_caught += 1
+        if (
+            self.game.save_data.lake_fish_caught == 1
+            and not self.game.save_data.lake_first_fish_popup_shown
+        ):
+            self._queue_popup(
+                "Lake",
+                "Great! As you saw, you need to pick what you want to do with the fish you catch. Let's store them all in the cooler for now, but usually you could also eat it to restore energy or release it."
+            )
+            self.game.save_data.lake_first_fish_popup_shown = True
+        elif (
+            self.game.save_data.lake_fish_caught == 2
+            and not self.game.save_data.lake_second_fish_popup_shown
+        ):
+            self._queue_popup(
+                "Lake",
+                "Well done, you began to get the gist of it! Now that we have a few fish, let’s check our cooler. To look into your cooler press Cooler"
+            )
+            self.game.save_data.lake_second_fish_popup_shown = True
+        elif (
+            self.game.save_data.lake_fish_caught == 3
+            and not self.game.save_data.lake_third_fish_popup_shown
+        ):
+            
+            self._queue_popup(
+                "Lake",
+                "As you look at it you are both proud of yourself, and with a bit of a question as to the fish's appearance"
+            )
+            # Change fish to a level 1 mutant
+            self.catch_mutation = 1
+            self.catch_image = self._load_catch_image()
+
+            # Making it harder to catch fish so the player wants to move on
+            self.location.trash_fish_ratio = [0.9, 0.1]
+
+            self.game.save_data.lake_third_fish_popup_shown = True
+            # This is the progression flag FreeState checks to show the next-location button.
+            self.game.save_data.flags.add("three_fish_caught_lake")
+
 
     # ---------- IMAGE HANDLING ----------
 
@@ -247,12 +290,24 @@ class FishingState(GameState):
                 return
 
             if self.cooler_button.collidepoint(event.pos):
-                self.game.save_data.cooler.append({
-                    "catchable": self.catch,
-                    "mutation": self.catch_mutation
-                })
-                self.game.pop_state()
-                return
+                if len(self.game.save_data.cooler) < self._cooler_capacity():
+
+                    # Add fish normally
+                    self.game.save_data.cooler.append({
+                        "catchable": self.catch,
+                        "mutation": self.catch_mutation
+                    })
+
+                    self.game.pop_state()
+
+                else:
+                    # Cooler is full → show popup
+                    self.game.save_data.pending_popup = {
+                        "title": "Cooler Full",
+                        "message": "Your cooler is full. You cannot store more fish."
+                    }
+
+                    self.game.pop_state()
 
     # ---------- DRAW ----------
     def draw(self, screen):

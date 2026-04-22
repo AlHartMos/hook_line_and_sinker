@@ -95,6 +95,7 @@ lake = Location(
     None, 
     lake_start,
     next_location=valley,
+    next_location_flag="three_fish_caught_lake"
     )
 
 tutorial = Location(
