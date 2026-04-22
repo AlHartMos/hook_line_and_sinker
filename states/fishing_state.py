@@ -163,7 +163,10 @@ class FishingState(GameState):
                 self.game.pop_state()
 
             elif self.cooler_button.collidepoint(event.pos):
-                self.game.save_data.cooler.append(self.catch)
+                self.game.save_data.cooler.append({
+                    "catchable": self.catch,
+                    "mutation": self.catch_mutation
+                })
                 self.game.pop_state()
 
     # ---------- DRAW ----------

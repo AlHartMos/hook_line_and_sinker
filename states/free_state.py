@@ -4,6 +4,7 @@ from states.base_state import GameState
 from states.dialogue_state import DialogueState
 from states.fishing_state import FishingState
 from states.button_overlay_state import ButtonOverlayState
+from states.cooler_state import CoolerState
 
 
 class FreeState(GameState):
@@ -27,6 +28,7 @@ class FreeState(GameState):
         # The overlay button is intended to live in the top-left corner,
         # so these controls stay in the bottom corners.
         self.fishing_button_rect = pygame.Rect(40, 620, 220, 56)
+        self.cooler_button_rect = pygame.Rect(500, 620, 220, 56)
         self.next_location_button_rect = pygame.Rect(1020, 620, 220, 56)
 
         # Fonts are created once and reused.
@@ -161,8 +163,11 @@ class FreeState(GameState):
             if self.next_location_button_rect.collidepoint(event.pos):
                 self._go_to_next_location()
                 return
+            
+            if self.cooler_button_rect.collidepoint(event.pos):
+                self.game.push_state(CoolerState(self.game))
+                return
 
-        # Other input can be added later for NPC clicks, movement, or world actions.
         return
 
     # This updates the free-roam world logic.
@@ -194,8 +199,9 @@ class FreeState(GameState):
         title_surf = self.title_font.render(title_text, True, (255, 255, 255))
         screen.blit(title_surf, (title_box.x + 16, title_box.y + 10))
 
-        # Draw the permanent fishing button.
+        # Draw the permanent fishing and cooler buttons.
         self._draw_button(screen, self.fishing_button_rect, "Fish")
+        self._draw_button(screen, self.cooler_button_rect, "Cooler")
 
         # Only draw the move-on button if the unlock flag is present.
         if self.can_move_on():
