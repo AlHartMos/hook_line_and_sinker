@@ -1,7 +1,7 @@
 import numpy as np
 from fishes import fish
 
-class Location ():
+class Location():
 
     def __init__(self, id, name, trash_fish_ratio, mutation_rates, image_path):
         self.id = id # Location id (matches order that the player visits)
@@ -16,7 +16,7 @@ class Location ():
     
     def trash_or_fish(self):
         # Returns zero if Fish and one if Trash
-        return np.random.choice([0, 1], self.trash_fish_ratio)
+        return np.random.choice([1, 0], self.trash_fish_ratio)
     
 # Defining the locations in a dictionary for easy access to data when designing the game
 tutorial = Location(0, "Tutorial", [0.7, 0.3], [1.0, 0.0, 0.0, 0.0, 0.0], "assets/Tutorial_Area.png")

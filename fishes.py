@@ -10,13 +10,24 @@ class Catchable():
         self.isFish = isFish
         self.isTrash = not isFish
         if self.isTrash:
-            trash.append(self.name)
+            trash.append(self)
         else:
-            fish.append(self.name)
+            fish.append(self)
 
         self.images = fish_images # List of the names of the fish assets for their base and mutated forms
         self.energy = energy # List of the amount of energy they give the player when eaten based on their mutation level
         self.mutation_score = mutation_score # List of how much each fish contributes to the player's mutation score based on their mutation level
+
+    def image_for_mutation(self, mutation_level=0):
+        # Returns the image path for the current mutation level
+        if self.images is None:
+            return None
+
+        if isinstance(self.images, (list, tuple)):
+            index = max(0, min(mutation_level, len(self.images) - 1))
+            return self.images[index]
+
+        return self.images
 
 
 # Defining the different catchable items

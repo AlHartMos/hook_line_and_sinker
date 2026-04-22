@@ -7,6 +7,8 @@ class GameState:
     # Connect state to main Game object, so it can share methods and data
     def __init__(self, game):
         self.game = game
+        #In child classes, write super().__init__(game) in the initalization
+        #This also calls the initialization from here, the parent class
 
     def enter(self):
         # Called when the state first becomes active (used to trigger NPC interactions)

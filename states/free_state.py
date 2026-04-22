@@ -6,7 +6,7 @@ from states.base_state import GameState
 class FreeState(GameState):
     # Initialize state with data from the game
     def __init__(self, game):
-        super().__init__(game) # super() also calls the initialization from BaseState, the parent class
+        super().__init__(game)
 
     # Handling user inputs
     def handle_event(self, event):
