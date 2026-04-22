@@ -25,6 +25,8 @@ class Game:
         self.state_stack = [] # Allows for different states to be used simultaneously (good for popups)
         self.push_state(FreeState(self)) # Starts the game in FreeState
 
+        self.npc_interactions_enabled = True # Allows for full NPC conversations, turned to False when actively in one
+
     # Recieve top state to work with the current state easily
     @property
     def state(self):

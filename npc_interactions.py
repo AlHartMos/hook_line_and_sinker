@@ -1,8 +1,8 @@
 # NPC data
 class Npc:
-    def __init__(self, name, image):
+    def __init__(self, name, image, hidden_name=None):
         self.name = name
-        self.hidden_name = "Stranger"
+        self.hidden_name = hidden_name
         self.image = image
 
 
@@ -19,7 +19,7 @@ class Dialogue:
 
 
 # Create NPCs
-bertha = Npc("Bertha", "assets/bertha.png")
+bertha = Npc("Bertha", "assets/bertha.png", hidden_name="???")
 selim = Npc("Selim", "assets/selim.png")
 hans = Npc("Hans", "assets/hans.png")
 unknown = Npc("Stranger", None)
