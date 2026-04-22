@@ -1,7 +1,7 @@
 import numpy as np
 
 from fishes import fish
-from dialogues.location_starters.tutorial_starter import tutorial_starter
+from dialogues.location_starters.tutorial_starter import tutorial_start
 
 
 class Location:
@@ -20,7 +20,7 @@ class Location:
     ):
         self.id = id # Location id (matches order that the player visits)
         self.name = name # Location name
-        self.trash_fish_ratio = trash_fish_ratio # Ratio of trash to fish that can be caught (trash:fish)
+        self.trash_fish_ratio = trash_fish_ratio # trash_fish_ratio: [probability_of_trash, probability_of_fish]
         self.mutation_rates = mutation_rates # List of the mutation chance when the player catches a fish
         self.image = image_path # Path to the image that will serve as the background for this location
 
@@ -45,10 +45,9 @@ class Location:
         # Returns the mutation level based on the current location
         return np.random.choice([0, 1, 2, 3, 4], p=self.mutation_rates)
 
-    def trash_or_fish(self):
-        # Returns one if Fish and zero if Trash
-        return np.random.choice([0, 1], self.trash_fish_ratio)
-    
+    def is_fish(self):
+        return np.random.choice([False, True], self.trash_fish_ratio)    
+
 # Defining the locations
 cave = Location(
     5, 
@@ -102,10 +101,10 @@ lake = Location(
 tutorial = Location(
     0, 
     "Tutorial", 
-    [0.7, 0.3], 
+    [1.0, 0.0], 
     [1.0, 0.0, 0.0, 0.0, 0.0], 
     "assets/Tutorial_Area.png", 
-    "dialogues/location_starters/tutorial_starter.py",
+    tutorial_start,
     next_location=lake,
-    next_location_flag="tutorial_fish_caught"
+    next_location_flag="three_trash_caught"
     )

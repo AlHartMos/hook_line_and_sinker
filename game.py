@@ -77,8 +77,19 @@ class Game:
 # Save data about the player as they progress through the game
 class SaveData:
     def __init__(self):
+        # Current game stats
         self.current_location = tutorial # Set current location
         self.flags = set() # list of things that have happened for story logic later on
         self.cooler = [] # List of caught fish records with mutation info        self.mutation_level = 0 # Mutation level of the players
         self.energy = 100 # Current energy level
+         
+        # Used by FreeState to show a one-time system popup after another state finishes.
+        self.pending_popup = None
+
+        # Tutorial Area progression
+        self.tutorial_trash_caught = 0
+        self.tutorial_first_trash_popup_shown = False
+        self.tutorial_second_trash_popup_shown = False
+        self.tutorial_third_trash_popup_shown = False
+
 

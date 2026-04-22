@@ -5,6 +5,7 @@ from states.dialogue_state import DialogueState
 from states.fishing_state import FishingState
 from states.button_overlay_state import ButtonOverlayState
 from states.cooler_state import CoolerState
+from states.popup_state import PopupState
 
 
 class FreeState(GameState):
@@ -174,6 +175,21 @@ class FreeState(GameState):
     # The first time this runs after entering a location, it checks for any
     # arrival conversation that should be shown.
     def update(self, dt):
+    # If another state requested a system popup, show it now.
+        if self.game.save_data.pending_popup is not None:
+            popup = self.game.save_data.pending_popup
+            self.game.save_data.pending_popup = None
+
+            self.game.push_state(
+                PopupState(
+                    self.game,
+                    title=popup["title"],
+                    message=popup["message"]
+                )
+            )
+            return
+
+        # Then handle the one-time arrival conversation for the location.
         if not self.arrival_checked:
             self.arrival_checked = True
             self._maybe_start_arrival_conversation()
@@ -198,6 +214,20 @@ class FreeState(GameState):
         title_text = self.location.name if self.location else "Unknown Location"
         title_surf = self.title_font.render(title_text, True, (255, 255, 255))
         screen.blit(title_surf, (title_box.x + 16, title_box.y + 10))
+
+        # Draw a small energy box in the top-right corner.
+        # This keeps it visible in free state without overlapping the title,
+        # fishing button, move-on button, or the overlay button.
+        energy_box = pygame.Rect(screen_w - 180, 20, 160, 44)
+        pygame.draw.rect(screen, (15, 15, 20), energy_box, border_radius=12)
+        pygame.draw.rect(screen, (255, 255, 255), energy_box, width=2, border_radius=12)
+
+        energy_text = self.small_font.render(
+            f"Energy: {self.game.save_data.energy}",
+            True,
+            (255, 255, 255)
+            )           
+        screen.blit(energy_text, (energy_box.x + 16, energy_box.y + 16))
 
         # Draw the permanent fishing and cooler buttons.
         self._draw_button(screen, self.fishing_button_rect, "Fish")

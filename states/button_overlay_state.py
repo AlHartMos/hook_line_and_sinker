@@ -13,7 +13,7 @@ class ButtonOverlayState(GameState):
         super().__init__(game)
 
         # Button position and size
-        self.button_rect = pygame.Rect(40, 40, 300, 60)
+        self.button_rect = pygame.Rect(400, 20, 300, 60)
 
         # Font will be created once when the state starts
         self.font = None

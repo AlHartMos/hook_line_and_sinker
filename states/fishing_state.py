@@ -11,38 +11,49 @@ class FishingState(GameState):
     def __init__(self, game):
         super().__init__(game)
 
+        # Current location is loaded when the state starts.
         self.location = None
         self.background = None
 
+        # These store the result of the fishing attempt.
         self.catch = None
         self.catch_mutation = 0
         self.catch_image = None
 
+        # Fishing costs energy immediately when the action begins.
+        self.game.save_data.energy = max(0, self.game.save_data.energy - 5)
+
         # Two-phase system:
-        # "reveal" → short delay before result
-        # "choice" → player decides what to do with catch
+        # "reveal" → short delay before the player sees the result
+        # "choice" → the player chooses Release or Add to cooler
         self.phase = "reveal"
         self.phase_started_at = 0
         self.reveal_duration_ms = 5000
 
+        # Fonts are created once and reused.
         self.title_font = None
         self.body_font = None
         self.button_font = None
         self.small_font = None
 
+        # Choice buttons shown after the catch reveal.
         self.release_button = pygame.Rect(340, 560, 180, 54)
         self.cooler_button = pygame.Rect(760, 560, 180, 54)
 
     def enter(self):
-        # Called once when fishing starts
+        # Called once when fishing starts.
+        # We load the location first, because all fishing logic depends on it.
         self.location = self.game.save_data.current_location
         self.background = self._load_background()
 
+        # Roll the catch before any progression logic runs.
         self.catch = self._roll_catch()
         self.catch_mutation = self._roll_mutation_if_needed()
         self.catch_image = self._load_catch_image()
 
-        self._handle_progression_unlock()
+        # Progression rules run after the catch exists.
+        # This keeps the tutorial logic tied to the actual result of fishing.
+        self._handle_progression()
 
         self.phase = "reveal"
         self.phase_started_at = pygame.time.get_ticks()
@@ -56,22 +67,20 @@ class FishingState(GameState):
     def exit(self):
         return super().exit()
 
-    # ---------- CORE LOGIC ----------
+    # ---------- CORE CATCH LOGIC ----------
 
     def _roll_catch(self):
-        # Decide whether player catches fish or trash
-        result = self.location.trash_or_fish()
+        # Use the location's boolean fish/trash roll.
+        # True means fish, False means trash.
+        if self.location.is_fish():
+            pool = self._fish_pool_for_location()
+            return np.random.choice(pool)
 
-        if result == 1:
-            # Trash
-            return np.random.choice(trash)
-
-        # Fish → use location-based pool
-        pool = self._fish_pool_for_location()
-        return np.random.choice(pool)
+        return np.random.choice(trash)
 
     def _fish_pool_for_location(self):
-        # Defines which fish are available in each location
+        # Defines which fish are available in each location.
+        # This can be expanded later into a per-location data system.
 
         if self.location.id == 0:      # Tutorial
             return [minnow]
@@ -91,14 +100,79 @@ class FishingState(GameState):
         elif self.location.id == 5:    # Cave
             return [minnow, perch, pike, catfish]
 
-        # Base case fallback
+        # Base case fallback.
         return [minnow]
 
     def _roll_mutation_if_needed(self):
-        # Only fish have mutation levels
+        # Only fish have mutation levels.
         if not getattr(self.catch, "isFish", False):
             return 0
+
         return self.location.mutation_level()
+
+    # ---------- PROGRESSION LOGIC ----------
+
+    def _queue_popup(self, title, message):
+        # Store a popup request so FreeState can show it once fishing ends.
+        # This keeps popup display separate from fishing logic.
+        self.game.save_data.pending_popup = {
+            "title": title,
+            "message": message
+        }
+
+    def _handle_progression(self):
+        # Location-specific progression dispatcher.
+        # As the game grows, each location can get its own helper here.
+        if self.location is None:
+            return
+
+        if self.location.id == 0:
+            self._handle_tutorial_progression()
+
+        # Example for later:
+        # elif self.location.id == 1:
+        #     self._handle_lake_progression()
+
+    def _handle_tutorial_progression(self):
+        # Tutorial progression only happens when the player catches trash.
+        # This teaches the player the fishing loop and unlocks the next area.
+        if not self.catch.isTrash:
+            return
+
+        self.game.save_data.tutorial_trash_caught += 1
+
+        if (
+            self.game.save_data.tutorial_trash_caught == 1
+            and not self.game.save_data.tutorial_first_trash_popup_shown
+        ):
+            self._queue_popup(
+                "Tutorial",
+                "No problems, not everything works the first time you do it. Just try again, and maybe you will catch a fish."
+            )
+            self.game.save_data.tutorial_first_trash_popup_shown = True
+
+        elif (
+            self.game.save_data.tutorial_trash_caught == 2
+            and not self.game.save_data.tutorial_second_trash_popup_shown
+        ):
+            self._queue_popup(
+                "Tutorial",
+                "Sorry, you haven’t caught anything interesting. Whenever you fish your energy bar is reduced slightly; in order to restore it you need to eat fish, and to do that you need to catch one first. So let’s just try it once more."
+            )
+            self.game.save_data.tutorial_second_trash_popup_shown = True
+
+        elif (
+            self.game.save_data.tutorial_trash_caught == 3
+            and not self.game.save_data.tutorial_third_trash_popup_shown
+        ):
+            self._queue_popup(
+                "Tutorial",
+                "Three trash catches! You can move on now."
+            )
+            self.game.save_data.tutorial_third_trash_popup_shown = True
+
+            # This is the progression flag FreeState checks to show the next-location button.
+            self.game.save_data.flags.add("three_trash_caught")
 
     # ---------- IMAGE HANDLING ----------
 
@@ -141,7 +215,7 @@ class FishingState(GameState):
     # ---------- UPDATE ----------
 
     def update(self, dt):
-        # After delay → move to choice phase
+        # After the reveal delay, switch to the choice phase.
         if self.phase == "reveal":
             now = pygame.time.get_ticks()
             if now - self.phase_started_at >= self.reveal_duration_ms:
@@ -154,7 +228,7 @@ class FishingState(GameState):
             self.game.running = False
             return
 
-        # Ignore input during reveal phase
+        # Ignore input while the reveal message is on screen.
         if self.phase != "choice":
             return
 
@@ -163,6 +237,8 @@ class FishingState(GameState):
                 self.game.pop_state()
 
             elif self.cooler_button.collidepoint(event.pos):
+                # Store the catch plus its mutation level so CoolerState can
+                # show the correct image and stat values later.
                 self.game.save_data.cooler.append({
                     "catchable": self.catch,
                     "mutation": self.catch_mutation
@@ -199,7 +275,7 @@ class FishingState(GameState):
         else:
             screen.fill((25, 35, 50))
 
-    def _draw_message_box(self, screen, title, body, image=None):
+    def _draw_message_box(self, screen, title, body="", image=None):
         box = pygame.Rect(120, 420, 1040, 230)
 
         pygame.draw.rect(screen, (20, 20, 20), box, border_radius=16)
@@ -224,10 +300,11 @@ class FishingState(GameState):
             text_y = box.y + 30
 
         title_surf = self.title_font.render(title, True, (255, 255, 255))
-        body_surf = self.body_font.render(body, True, (230, 230, 230))
-
         screen.blit(title_surf, (box.x + 28, text_y))
-        screen.blit(body_surf, (box.x + 28, text_y + 44))
+
+        if body:
+            body_surf = self.body_font.render(body, True, (230, 230, 230))
+            screen.blit(body_surf, (box.x + 28, text_y + 44))
 
     def _draw_button(self, screen, rect, label):
         pygame.draw.rect(screen, (40, 40, 60), rect, border_radius=12)
@@ -235,21 +312,3 @@ class FishingState(GameState):
 
         surf = self.button_font.render(label, True, (255, 255, 255))
         screen.blit(surf, surf.get_rect(center=rect.center))
-    
-    def _handle_progression_unlock(self):
-    # This method is responsible for setting progression flags
-    # based on what the player just did in fishing.
-
-        location = self.location
-
-        if location is None:
-            return
-
-        # Example: Tutorial progression
-        if location.id == 0:
-            # First successful catch unlocks next area
-            self.game.save_data.flags.add("tutorial_fish_caught")
-
-# If this game is ever iterated upon stuff to add would be:
-    # Catch minigame
-    # Fish rarities
