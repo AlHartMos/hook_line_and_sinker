@@ -4,37 +4,39 @@ from states.base_state import GameState
 
 
 class DialogueState(GameState):
-    # This class handles every conversation in the game.
-    # It can show NPC dialogue, player thoughts, and player choice buttons
-    # as long as the conversation data follows the same node-based format.
+    # This state handles any conversation in the game.
+    # A conversation is a dictionary of nodes, and each node is a list of Dialogue objects.
+    # A node can be:
+    # - normal dialogue lines (npc / thought)
+    # - or a choice node where every entry has kind="choice"
     def __init__(self, game, conversation, start_node="intro"):
-        # We store the game reference through the parent class so this state
-        # can access save data, the state stack, image loading, and other shared systems.
+        # Store the shared game reference so the state can access save data,
+        # the state stack, and image loading.
         super().__init__(game)
 
-        # This is the conversation data passed in from outside.
-        # It should be a dictionary of nodes, where each node maps to a list of Dialogue objects.
+        # The conversation dictionary passed in by the location or event.
         self.conversation = conversation
 
-        # This is the current node name in the conversation.
-        # Example: "intro", "questions", or a branch name like "bertha_where".
+        # The node we are currently reading from.
         self.node = start_node
 
-        # This is the index of the current line inside the active node.
+        # Which line inside the current node is active.
         self.line_index = 0
 
-        # These caches and UI lists help the state render portraits and buttons efficiently.
+        # Cache portraits so we do not reload the same image every frame.
         self.portrait_cache = {}
+
+        # Stores button rectangles for the current choice screen.
         self.choice_buttons = []
 
-        # Fonts are created once and reused so we do not recreate them every frame.
+        # Fonts are created once and reused.
         self.title_font = None
         self.body_font = None
         self.choice_font = None
         self.small_font = None
 
-    # This runs once when the dialogue state becomes active.
-    # It is a good place to set up any UI resources that the state needs.
+    # This runs once when the dialogue becomes active.
+    # It prepares the fonts used by the dialogue UI.
     def enter(self):
         if self.title_font is None:
             self.title_font = pygame.font.SysFont(None, 42)
@@ -42,18 +44,15 @@ class DialogueState(GameState):
             self.choice_font = pygame.font.SysFont(None, 28)
             self.small_font = pygame.font.SysFont(None, 24)
 
-    # This runs when the dialogue state is being removed.
-    # It exists mainly as a cleanup hook and keeps the state interface consistent.
+    # Cleanup hook for consistency with the rest of the state system.
     def exit(self):
         return super().exit()
 
-    # This returns the list of Dialogue objects for the current node.
-    # It keeps the rest of the code simple because we only have to ask for the active node in one place.
+    # Returns the list of Dialogue entries for the active node.
     def current_entries(self):
         return self.conversation.get(self.node, [])
 
-    # This returns the current Dialogue object in the active node.
-    # It is used by the drawing and advancing code so they always know what line is active.
+    # Returns the current Dialogue object inside the active node.
     def current_entry(self):
         entries = self.current_entries()
         if not entries:
@@ -62,45 +61,34 @@ class DialogueState(GameState):
             return None
         return entries[self.line_index]
 
-    # This checks whether the current node is a choice node.
-    # Choice nodes are displayed as buttons instead of advancing line by line.
+    # A node is a choice node if every entry in it is marked as kind="choice".
+    # This lets you place choices in any node, not just a special "questions" node.
     def is_choice_node(self):
         entries = self.current_entries()
-        return bool(entries) and getattr(entries[0], "kind", "npc") == "choice"
+        return bool(entries) and all(getattr(entry, "kind", "npc") == "choice" for entry in entries)
 
-    # This decides what name should be shown above the dialogue.
-    # It lets you hide identities such as "Bertha" and show "???" until the reveal flag exists.
+    # Returns the list of available choice entries for the current node.
+    # If the current node is not a choice node, this returns an empty list.
+    def current_choices(self):
+        if not self.is_choice_node():
+            return []
+        return self.current_entries()
+
+    # Decides what name should be shown above the dialogue.
+    # This keeps your hidden-name reveal behavior working.
     def get_display_name(self, dialogue):
-    # If no character, nothing to show
         if dialogue is None or dialogue.character is None:
             return None
 
         npc = dialogue.character
 
-        # If NPC has a hidden name AND reveal flag not triggered → show hidden name
         if npc.hidden_name and dialogue.flag:
             if dialogue.flag not in self.game.save_data.flags:
                 return npc.hidden_name
 
-        # Otherwise show real name
         return npc.name
 
-    # This filters out questions that have already been asked.
-    # Any choice whose flag is already in save data will no longer appear.
-    def get_available_choices(self):
-        choices = self.conversation.get("questions", [])
-        available = []
-
-        for choice in choices:
-            if choice.flag is None:
-                available.append(choice)
-            elif choice.flag not in self.game.save_data.flags:
-                available.append(choice)
-
-        return available
-
-    # This loads and caches portrait images so they do not need to be reloaded every frame.
-    # It also safely handles missing images by returning None.
+    # Loads and caches portraits so they do not need to be reloaded constantly.
     def get_portrait(self, dialogue):
         if dialogue is None:
             return None
@@ -117,8 +105,7 @@ class DialogueState(GameState):
 
         return self.portrait_cache[image_path]
 
-    # This wraps long text into multiple lines so it fits inside the dialogue box.
-    # It prevents long dialogue from running off the edge of the UI.
+    # Wraps text so it fits inside the dialogue box.
     def wrap_text(self, text, font, max_width):
         words = text.split(" ")
         lines = []
@@ -138,8 +125,8 @@ class DialogueState(GameState):
 
         return lines
 
-    # This advances the conversation when the player clicks or presses a key.
-    # It also stores any flag attached to the current dialogue line before moving on.
+    # Advances normal dialogue one line at a time.
+    # If the current line has a next_node, it jumps there when the node finishes.
     def advance(self):
         entries = self.current_entries()
         if not entries:
@@ -151,7 +138,7 @@ class DialogueState(GameState):
             self.game.pop_state()
             return
 
-        # If this line has a flag, remember that it happened.
+        # If the current line has a flag, store it now.
         if current.flag:
             self.game.save_data.flags.add(current.flag)
 
@@ -159,32 +146,24 @@ class DialogueState(GameState):
 
         self.line_index += 1
 
-        # If there are more lines in the current node, stay here.
+        # Stay in the same node if there are more lines left.
         if self.line_index < len(entries):
             return
 
-        # If the node has a next_node, jump there after the final line.
+        # If this node points somewhere else, jump there.
         if next_node:
             self.node = next_node
             self.line_index = 0
-
-            # If we land back on questions, and there are no choices left, end the conversation.
-            if self.node == "questions" and not self.get_available_choices():
-                self.node = "end"
-                self.line_index = 0
-
             return
 
-        # If there is no next node, end the conversation.
+        # If there is no next node, the conversation is over.
         self.game.pop_state()
 
-    # This handles the player selecting one of the visible choice buttons.
-    # It stores the choice's flag, then jumps to the branch assigned to that choice.
+    # Handles the player clicking a choice button.
     def choose_choice(self, choice_index):
-        choices = self.get_available_choices()
+        choices = self.current_choices()
         if not choices:
-            self.node = "end"
-            self.line_index = 0
+            self.game.pop_state()
             return
 
         if choice_index < 0 or choice_index >= len(choices):
@@ -195,16 +174,15 @@ class DialogueState(GameState):
         if choice.flag:
             self.game.save_data.flags.add(choice.flag)
 
-        self.node = choice.next_node or "questions"
+        self.node = choice.next_node or "end"
         self.line_index = 0
 
-        # If the branch returns to questions and nothing is left to ask, end the conversation.
-        if self.node == "questions" and not self.get_available_choices():
-            self.node = "end"
-            self.line_index = 0
+        # If the chosen branch lands on an empty node, the conversation ends naturally.
+        if not self.current_entries():
+            self.game.pop_state()
 
-    # This receives keyboard and mouse input while the conversation is active.
-    # It routes clicks to choices or advances normal dialogue with space, enter, or click.
+    # Handles keyboard and mouse input.
+    # Choice nodes use buttons, normal dialogue uses click / space / enter to advance.
     def handle_event(self, event):
         if event.type == pygame.QUIT:
             self.game.running = False
@@ -225,13 +203,11 @@ class DialogueState(GameState):
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.advance()
 
-    # This is where per-frame logic would go if the dialogue ever needed timers or animations.
-    # For now it exists so the state still follows the same update pattern as the rest of the game.
+    # No timer-based logic is needed yet.
     def update(self, dt):
         return
 
-    # This draws the active conversation frame.
-    # It chooses between normal dialogue rendering and the question-button screen.
+    # Draws either normal dialogue or the current choice screen.
     def draw(self, screen):
         screen.fill((20, 24, 34))
 
@@ -242,8 +218,7 @@ class DialogueState(GameState):
 
         pygame.display.flip()
 
-    # This draws NPC dialogue or player thoughts.
-    # It shows portraits for NPC lines and leaves thoughts text-only.
+    # Draws NPC dialogue or player thoughts.
     def draw_dialogue_screen(self, screen):
         entry = self.current_entry()
         if entry is None:
@@ -290,8 +265,7 @@ class DialogueState(GameState):
         hint = self.small_font.render("Space / click to continue", True, (180, 180, 180))
         screen.blit(hint, (box.right - hint.get_width() - 18, box.bottom - 30))
 
-    # This draws the player-choice screen.
-    # It shows every unanswered question as a button and lets the player pick one.
+    # Draws a choice screen for the current node.
     def draw_choice_screen(self, screen):
         screen_w, screen_h = screen.get_size()
         box = pygame.Rect(70, screen_h - 260, screen_w - 140, 200)
@@ -299,10 +273,10 @@ class DialogueState(GameState):
         pygame.draw.rect(screen, (15, 15, 20), box, border_radius=18)
         pygame.draw.rect(screen, (240, 240, 240), box, width=3, border_radius=18)
 
-        prompt = self.title_font.render("Choose a question:", True, (255, 255, 255))
+        prompt = self.title_font.render("Choose:", True, (255, 255, 255))
         screen.blit(prompt, (box.x + 24, box.y + 18))
 
-        choices = self.get_available_choices()
+        choices = self.current_choices()
         self.choice_buttons = []
 
         button_x = box.x + 24

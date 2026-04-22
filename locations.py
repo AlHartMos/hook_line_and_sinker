@@ -1,8 +1,7 @@
 import numpy as np
 
-from fishes import fish
 from dialogues.location_starters.tutorial_starter import tutorial_start
-
+from dialogues.location_starters.lake_starter import lake_start
 
 class Location:
     def __init__(
@@ -94,7 +93,7 @@ lake = Location(
     [0.3, 0.7], 
     [0.8, 0.2, 0.0, 0.0, 0.0], 
     None, 
-    "dialogues/location_starters/lake_starter.py",
+    lake_start,
     next_location=valley,
     )
 

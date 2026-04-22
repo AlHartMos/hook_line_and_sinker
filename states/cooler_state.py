@@ -162,10 +162,10 @@ class CoolerState(GameState):
         # Add progression flags when thresholds are reached.
         # These are only added once because flags are stored in a set.
         if self.game.save_data.mutation_level >= 25:
-            self.game.save_data.flags.add("mutation_25_plus")
+            self.game.save_data.flags.add("25_mutation")
 
         if self.game.save_data.mutation_level >= 100:
-            self.game.save_data.flags.add("mutation_100_plus")
+            self.game.save_data.flags.add("100_mutation")
 
     # This removes a catch from the cooler by index.
     # It is used by both Eat and Release.

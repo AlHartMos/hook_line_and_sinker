@@ -20,9 +20,6 @@ class FishingState(GameState):
         self.catch_mutation = 0
         self.catch_image = None
 
-        # Fishing costs energy immediately when the action begins.
-        self.game.save_data.energy = max(0, self.game.save_data.energy - 5)
-
         # Two-phase system:
         # "reveal" → short delay before the player sees the result
         # "choice" → the player chooses Release or Add to cooler
@@ -37,8 +34,11 @@ class FishingState(GameState):
         self.small_font = None
 
         # Choice buttons shown after the catch reveal.
-        self.release_button = pygame.Rect(340, 560, 180, 54)
-        self.cooler_button = pygame.Rect(760, 560, 180, 54)
+        # Eat is only shown if the catch is a fish.
+        center_x = 1280 // 2
+        self.eat_button     = pygame.Rect(center_x - 300, 560, 180, 54)
+        self.release_button = pygame.Rect(center_x - 90, 560, 180, 54)
+        self.cooler_button  = pygame.Rect(center_x + 120, 560, 180, 54)
 
     def enter(self):
         # Called once when fishing starts.
@@ -50,6 +50,9 @@ class FishingState(GameState):
         self.catch = self._roll_catch()
         self.catch_mutation = self._roll_mutation_if_needed()
         self.catch_image = self._load_catch_image()
+
+        # Fishing costs energy immediately when the action begins.
+        self.game.save_data.energy = max(0, self.game.save_data.energy - 5)
 
         # Progression rules run after the catch exists.
         # This keeps the tutorial logic tied to the actual result of fishing.
@@ -228,25 +231,30 @@ class FishingState(GameState):
             self.game.running = False
             return
 
-        # Ignore input while the reveal message is on screen.
+        # Ignore input during the reveal phase
         if self.phase != "choice":
             return
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            # Eat is only available for fish catches.
+            if self.catch is not None and self.catch.isFish:
+                if self.eat_button.collidepoint(event.pos):
+                    self._eat_catch()
+                    return
+
             if self.release_button.collidepoint(event.pos):
                 self.game.pop_state()
+                return
 
-            elif self.cooler_button.collidepoint(event.pos):
-                # Store the catch plus its mutation level so CoolerState can
-                # show the correct image and stat values later.
+            if self.cooler_button.collidepoint(event.pos):
                 self.game.save_data.cooler.append({
                     "catchable": self.catch,
                     "mutation": self.catch_mutation
                 })
                 self.game.pop_state()
+                return
 
     # ---------- DRAW ----------
-
     def draw(self, screen):
         self._draw_background(screen)
 
@@ -262,6 +270,10 @@ class FishingState(GameState):
                 f"You caught a {self.catch.name}.",
                 image=self.catch_image
             )
+
+            # Only fish can be eaten.
+            if self.catch is not None and self.catch.isFish:
+                self._draw_button(screen, self.eat_button, "Eat")
 
             self._draw_button(screen, self.release_button, "Release")
             self._draw_button(screen, self.cooler_button, "Add to cooler")
@@ -312,3 +324,38 @@ class FishingState(GameState):
 
         surf = self.button_font.render(label, True, (255, 255, 255))
         screen.blit(surf, surf.get_rect(center=rect.center))
+
+    def _safe_stat_value(self, values, mutation):
+        # Returns the stat value for the current mutation level,
+        # while safely clamping the index into the valid range.
+        if not values:
+            return 0
+
+        index = max(0, min(int(mutation), len(values) - 1))
+        return values[index]
+    
+
+    def _apply_eat_rewards(self):
+        # Eating a fish gives the player energy and mutation progress.
+        # The exact reward depends on the fish and its mutation level.
+        if self.catch is None or not getattr(self.catch, "isFish", False):
+            return
+    
+        energy_gain = self._safe_stat_value(getattr(self.catch, "energy", []), self.catch_mutation)
+        mutation_gain = self._safe_stat_value(getattr(self.catch, "mutation_score", []), self.catch_mutation)
+    
+        self.game.save_data.energy += energy_gain
+        self.game.save_data.mutation_level += mutation_gain
+    
+        # Set mutation milestone flags once the player reaches the threshold.
+        # These flags can be checked elsewhere for story or progression logic.
+        if self.game.save_data.mutation_level >= 25:
+            self.game.save_data.flags.add("25_mutation")
+    
+        if self.game.save_data.mutation_level >= 100:
+            self.game.save_data.flags.add("100_mutation")
+    
+    def _eat_catch(self):
+        # Eat the caught fish immediately and return to FreeState.
+        self._apply_eat_rewards()
+        self.game.pop_state()
