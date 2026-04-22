@@ -3,76 +3,85 @@ from states.base_state import GameState
 
 
 class ButtonOverlayState(GameState):
-    # This state sits on top of another state (usually FreeState)
-    # and draws a clickable button without stopping the underlying state.
-    def __init__(self, game, underlying_state):
-        # Store reference to the main game (from GameState)
+    # This state draws a UI button on top of whatever state is underneath it.
+    # It is designed to behave like an overlay:
+    # - It does NOT replace gameplay
+    # - It only intercepts specific input (button clicks)
+    # - Everything else continues as normal
+
+    def __init__(self, game):
         super().__init__(game)
 
-        # This is the state underneath (e.g., FreeState).
-        # We forward updates, drawing, and most input to it.
-        self.underlying_state = underlying_state
-
-        # Rectangle that defines the button's position and size on screen.
+        # Button position and size
         self.button_rect = pygame.Rect(40, 40, 300, 60)
 
-        # Font will be created once when the state starts.
+        # Font will be created once when the state starts
         self.font = None
 
+        # Whether input should pass through to underlying states
+        # (useful for letting FreeState still receive input)
+        self.pass_through = True
+
     def enter(self):
-        # Called once when the state is pushed onto the stack.
-        # We initialize the font here so it's not recreated every frame.
+        # Called once when the overlay is added to the stack
         if self.font is None:
             self.font = pygame.font.SysFont(None, 30)
 
-    def handle_event(self, event):
-        # This handles input events (mouse, keyboard, etc.)
+    def exit(self):
+        return super().exit()
 
-        # Allow the window to close properly
+    def handle_event(self, event):
+        # Handle quit normally
         if event.type == pygame.QUIT:
             self.game.running = False
             return
 
-        # Handle mouse clicks
+        # Handle button click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # If the click is inside the button, toggle the setting
             if self.button_rect.collidepoint(event.pos):
+                # Toggle NPC conversations on/off
                 self.game.npc_interactions_enabled = not self.game.npc_interactions_enabled
-            else:
-                # If the click is NOT on the button,
-                # pass the event to the underlying state so it still works normally
-                self.underlying_state.handle_event(event)
-        else:
-            # For all other events (keyboard, movement, etc.),
-            # forward them directly to the underlying state
-            self.underlying_state.handle_event(event)
+                return  # Stop here → do NOT pass click through
+
+        # If pass-through is enabled, forward the event to the state below
+        if self.pass_through:
+            self._forward_event(event)
+
+    def _forward_event(self, event):
+        # This sends the event to the next state down in the stack.
+        # It allows FreeState to still receive input even though this overlay is on top.
+
+        if len(self.game.state_stack) < 2:
+            return
+
+        underlying_state = self.game.state_stack[-2]
+        underlying_state.handle_event(event)
 
     def update(self, dt):
-        # This updates the underlying state every frame.
-        # This is what allows FreeState to keep running while the overlay exists.
-        self.underlying_state.update(dt)
+        # Forward update so underlying gameplay continues running
+        if self.pass_through and len(self.game.state_stack) >= 2:
+            self.game.state_stack[-2].update(dt)
 
     def draw(self, screen):
-        # First draw the underlying state (the game world, etc.)
-        self.underlying_state.draw(screen)
+        # First draw the underlying state
+        if len(self.game.state_stack) >= 2:
+            self.game.state_stack[-2].draw(screen)
 
-        # Decide what text to show based on the toggle state
+        # Decide button text based on toggle state
         if self.game.npc_interactions_enabled:
             text = "NPC Conversations: On"
         else:
             text = "NPC Conversations: Off"
 
-        # Draw the button background
+        # Draw button background
         pygame.draw.rect(screen, (35, 35, 50), self.button_rect, border_radius=10)
 
-        # Draw the button border
+        # Draw border
         pygame.draw.rect(screen, (255, 255, 255), self.button_rect, width=2, border_radius=10)
 
-        # Render the button text
+        # Render text
         text_surf = self.font.render(text, True, (255, 255, 255))
-
-        # Center the text inside the button
         text_rect = text_surf.get_rect(center=self.button_rect.center)
 
-        # Draw the text onto the screen
+        # Draw text
         screen.blit(text_surf, text_rect)
