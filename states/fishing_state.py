@@ -290,7 +290,8 @@ class FishingState(GameState):
                 return
 
             if self.cooler_button.collidepoint(event.pos):
-                if len(self.game.save_data.cooler) < self._cooler_capacity():
+                capacity = self.game.save_data._cooler_capacity()
+                if len(self.game.save_data.cooler) < capacity():
 
                     # Add fish normally
                     self.game.save_data.cooler.append({
