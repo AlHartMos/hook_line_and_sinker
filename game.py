@@ -21,11 +21,10 @@ class Game:
         self.running = True # Ensures the game keeps running until it's stopped
 
         self.save_data = SaveData() # Get data for user
+        self.npc_interactions_enabled = True # Allows for full NPC conversations, turned to False when actively in one
 
         self.state_stack = [] # Allows for different states to be used simultaneously (good for popups)
         self.push_state(FreeState(self)) # Starts the game in FreeState
-
-        self.npc_interactions_enabled = True # Allows for full NPC conversations, turned to False when actively in one
 
     # Recieve top state to work with the current state easily
     @property

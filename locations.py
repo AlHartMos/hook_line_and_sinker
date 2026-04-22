@@ -1,5 +1,8 @@
 import numpy as np
+
 from fishes import fish
+from dialogues.location_starters.tutorial_starter import tutorial_starter
+
 
 class Location:
     def __init__(

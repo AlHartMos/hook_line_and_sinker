@@ -71,17 +71,19 @@ class DialogueState(GameState):
     # This decides what name should be shown above the dialogue.
     # It lets you hide identities such as "Bertha" and show "???" until the reveal flag exists.
     def get_display_name(self, dialogue):
-        if dialogue is None or getattr(dialogue, "character", None) is None:
+    # If no character, nothing to show
+        if dialogue is None or dialogue.character is None:
             return None
 
-        name = dialogue.character.name
+        npc = dialogue.character
 
-        # Example of a hidden identity rule:
-        # before the reveal flag exists, show ??? instead of the real name.
-        if name == "Bertha" and "bertha_introduces_herself" not in self.game.save_data.flags:
-            return "???"
+        # If NPC has a hidden name AND reveal flag not triggered → show hidden name
+        if npc.hidden_name and dialogue.flag:
+            if dialogue.flag not in self.game.save_data.flags:
+                return npc.hidden_name
 
-        return name
+        # Otherwise show real name
+        return npc.name
 
     # This filters out questions that have already been asked.
     # Any choice whose flag is already in save data will no longer appear.

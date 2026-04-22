@@ -42,6 +42,8 @@ class FishingState(GameState):
         self.catch_mutation = self._roll_mutation_if_needed()
         self.catch_image = self._load_catch_image()
 
+        self._handle_progression_unlock()
+
         self.phase = "reveal"
         self.phase_started_at = pygame.time.get_ticks()
 
@@ -230,6 +232,20 @@ class FishingState(GameState):
 
         surf = self.button_font.render(label, True, (255, 255, 255))
         screen.blit(surf, surf.get_rect(center=rect.center))
+    
+    def _handle_progression_unlock(self):
+    # This method is responsible for setting progression flags
+    # based on what the player just did in fishing.
+
+        location = self.location
+
+        if location is None:
+            return
+
+        # Example: Tutorial progression
+        if location.id == 0:
+            # First successful catch unlocks next area
+            self.game.save_data.flags.add("tutorial_fish_caught")
 
 # If this game is ever iterated upon stuff to add would be:
     # Catch minigame
