@@ -68,8 +68,7 @@ npc_interactions.py
 states/
 Contains all gameplay systems:
 
-    - base_state.py → base class for all states
-
+- base_state.py → base class for all states
 - free_state.py → main exploration state
 - fishing_state.py → fishing interaction
 - dialogue_state.py → dialogue system
