@@ -19,6 +19,7 @@ bertha_post_shop = {
             player,
             "Ask about the treasure",
             kind="choice",
+            associated_flag="asked_bertha_treasure",
             next_node="treasure_confrontation"
         ),
 
@@ -76,7 +77,6 @@ bertha_post_shop = {
             player,
             "You won’t return to Bertha again.",
             kind="thought",
-            associated_flag="bertha_locked_out",
             next_node="end"
         )
     ],

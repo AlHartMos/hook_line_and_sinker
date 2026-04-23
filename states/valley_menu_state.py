@@ -24,12 +24,13 @@ class ValleyMenuState(GameState):
             self.options.append(("Go to shack", "meeting_hans"))
 
         # --- Bertha ---
-        if "meeting_bertha_complete" not in flags:
-            self.options.append(("Go to house", "meeting_bertha"))
-        elif "trading_with_bertha_complete" not in flags:
-            self.options.append(("Trade with Bertha", "bertha_trading"))
-        else:
-            self.options.append(("Visit Bertha", "bertha_post_shop"))
+        if "asked_bertha_treasure" not in flags:
+            if "meeting_bertha_complete" not in flags:
+                self.options.append(("Go to house", "meeting_bertha"))
+            elif "trading_with_bertha_complete" not in flags:
+                self.options.append(("Trade with Bertha", "bertha_trading"))
+            else:
+                self.options.append(("Visit Bertha", "bertha_post_shop"))
 
         # --- Felix ---
         if "met_felix" not in flags:
