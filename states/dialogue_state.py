@@ -78,9 +78,14 @@ class DialogueState(GameState):
 
         filtered = []
         for c in choices:
+            # Hide treasure option unless flag is present
+            if c.text == "Ask about the treasure":
+                if "felix_revealed_treasure" not in self.game.save_data.flags:
+                    continue
             if c.flag and c.flag in self.game.save_data.flags:
                 continue  # hide already purchased item
             filtered.append(c)
+
 
         return filtered
 
@@ -190,7 +195,7 @@ class DialogueState(GameState):
             self.game.save_data.flags.add(choice.flag)
 
         # Check if this choice triggers a trade
-        if hasattr(self.conversation, "_trade") and choice.next_node in self.conversation["_trade"]:
+        if "_trade" in self.conversation and choice.next_node in self.conversation["_trade"]:
             trade_request = self.conversation["_trade"][choice.next_node]
 
             # Attach conversation reference for return

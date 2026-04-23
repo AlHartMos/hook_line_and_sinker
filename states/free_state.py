@@ -134,10 +134,41 @@ class FreeState(GameState):
     # We do NOT replace FreeState with a new FreeState, because the overlay
     # is sitting on top of it and should stay in place.
     def _set_location(self, new_location):
+        old_location = self.location
+    
         self.game.save_data.current_location = new_location
         self.location = new_location
         self.background = self._load_background()
         self.arrival_checked = False
+    
+        # --- APPLY TRAVEL COST ---
+        if old_location and new_location:
+        
+            # Only apply between Lake (1) and Valley (2)
+            if (
+                (old_location.id == 1 and new_location.id == 2) or
+                (old_location.id == 2 and new_location.id == 1)
+            ):
+                travel_cost = getattr(self, "_pending_travel_cost", 0)
+    
+                self.game.save_data.energy = max(
+                    0,
+                    self.game.save_data.energy - travel_cost
+                )
+    
+                # --- ARRIVAL BUFFER ---
+                # Ensure player has at least 10 energy to fish
+                if self.game.save_data.energy < 10:
+                    self.game.save_data.energy = 10
+    
+                # Feedback popup
+                self.game.save_data.pending_popup = {
+                    "title": "Exhaustion",
+                    "message": "The journey drained your energy."
+                }
+    
+        # Clear stored cost after use
+        self._pending_travel_cost = 0
 
     # This handles the move-on button.
     # It updates the current location directly, then waits for the next update
@@ -145,6 +176,27 @@ class FreeState(GameState):
     def _go_to_next_location(self):
         if not self.can_move_on():
             return
+
+        # --- TRAVEL COST SETUP ---
+        TRAVEL_PERCENT = 0.2  # 20% energy cost
+        MIN_ENERGY_AFTER_TRAVEL = 10
+
+        current_energy = self.game.save_data.energy
+        travel_cost = int(current_energy * TRAVEL_PERCENT)
+
+        remaining_energy = current_energy - travel_cost
+
+        # --- TOO TIRED CHECK ---
+        # Player must still have enough energy left AFTER travel
+        if remaining_energy < MIN_ENERGY_AFTER_TRAVEL:
+            self.game.save_data.pending_popup = {
+                "title": "Too Tired",
+                "message": "You are too exhausted to make the journey."
+            }
+            return
+
+        # Store the computed cost so we don't recalculate inconsistently
+        self._pending_travel_cost = travel_cost
 
         self._set_location(self.location.next_location)
 

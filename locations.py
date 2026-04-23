@@ -2,6 +2,7 @@ import numpy as np
 
 from dialogues.location_starters.tutorial_starter import tutorial_start
 from dialogues.location_starters.lake_starter import lake_start
+from dialogues.location_starters.valley_starter import valley_start
 
 class Location:
     def __init__(
@@ -63,7 +64,7 @@ lighthouse = Location(
     [0.01, 0.99], 
     [0.2, 0.2, 0.3, 0.3, 0.0], 
     None, 
-    "dialogues/location_starters/lighthouse_starter.py",
+    None,
     next_location=cave
     )
 
@@ -73,7 +74,7 @@ forest = Location(
     [0.1, 0.9], 
     [0.4, 0.3, 0.2, 0.1, 0.0], 
     None, 
-    "dialogues/location_starters/forest_starter.py",
+    None,
     next_location=lighthouse
     )
 
@@ -82,8 +83,8 @@ valley = Location(
     "Valley", 
     [0.1, 0.9], 
     [0.6, 0.3, 0.1, 0.0, 0.0], 
-    None, 
-    "dialogues/location_starters/valley_starter.py",
+    "assets/Foggy_Lake.png", #Just for now
+    valley_start,
     next_location=forest
     )
 
@@ -92,7 +93,7 @@ lake = Location(
     "Lake", 
     [0.3, 0.7], 
     [0.8, 0.2, 0.0, 0.0, 0.0], 
-    None, 
+    "assets/Foggy_Lake.png", 
     lake_start,
     next_location=valley,
     next_location_flag="three_fish_caught_lake"

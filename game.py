@@ -99,6 +99,9 @@ class SaveData:
         self.lake_second_fish_popup_shown = False
         self.lake_third_fish_popup_shown = False
 
+        # Fish tracking for Felix questline
+        self.felix_fish_given = 0
+
     # Cooler data
     def _cooler_capacity(self):
     # Base capacity is 16

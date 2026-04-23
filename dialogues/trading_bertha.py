@@ -69,6 +69,7 @@ bertha_trading = {
             bertha,
             "Thank you. I hope my old lighter will help you in this darkness.",
             kind="npc",
+            associated_flag="purchased_lighter",
             next_node="shop_menu"
         )
     ],
@@ -78,6 +79,7 @@ bertha_trading = {
             bertha,
             "Thank you. Here is my cooler. I believe it will be more helpful to you than for me.",
             kind="npc",
+            associated_flag="purchased_extra_cooler",
             next_node="shop_menu"
         )
     ],
@@ -87,6 +89,7 @@ bertha_trading = {
             bertha,
             "So much fish… I wasn’t wrong about you. Here, take my spices, I know they make eating fish a bit more interesting.",
             kind="npc",
+            associated_flag="purchased_salt",
             next_node="shop_menu"
         )
     ],
@@ -97,6 +100,7 @@ bertha_trading = {
             bertha,
             "Thank you for your services. You are truly amazing. I no longer have anything of value with me. If you wish, come and vist from time to time.",
             kind="npc",
+            associated_flag="trading_with_bertha_complete",
             next_node="end"
         )
     ],
@@ -115,7 +119,7 @@ bertha_trading["_trade"] = {
 
     "trade_cooler": {
         "item_id": "extra_cooler",
-        "required_fish": 5,
+        "required_fish": 3,
         "purchase_flag": "purchased_extra_cooler",
         "fail_node": "not_enough",
         "resume_node": "cooler_success"
@@ -123,7 +127,7 @@ bertha_trading["_trade"] = {
 
     "trade_salt": {
         "item_id": "salt",
-        "required_fish": 4,
+        "required_fish": 3,
         "purchase_flag": "purchased_salt",
         "fail_node": "not_enough",
         "resume_node": "salt_success"
