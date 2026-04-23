@@ -1,6 +1,6 @@
 from npc_interactions import Dialogue, felix, player
 
-felix_intro = {
+meeting_felix = {
 
     # ---------- INTRO ----------
     "intro": [

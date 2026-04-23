@@ -58,7 +58,7 @@ meeting_hans_lake = {
             "And what the fuck do you want?",
             kind="choice",
             associated_flag="ask_hans_what_lake",
-            next_node=""
+            next_node="ask_what"
         ),
         Dialogue(
             player,
@@ -72,7 +72,7 @@ meeting_hans_lake = {
             "...",
             kind="choice",
             associated_flag="ask_hans_nothing_lake",
-            next_node=""
+            next_node="ask_nothing"
         )
     ],
 
@@ -99,7 +99,6 @@ meeting_hans_lake = {
             hans,
             "None of your fucking business.",
             kind="npc",
-            next_node="questions"
         ),
         Dialogue(
             player,

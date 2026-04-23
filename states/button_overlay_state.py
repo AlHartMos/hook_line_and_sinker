@@ -1,5 +1,6 @@
 import pygame
 from states.base_state import GameState
+from states.valley_menu_state import ValleyMenuState
 
 
 class ButtonOverlayState(GameState):
@@ -39,10 +40,10 @@ class ButtonOverlayState(GameState):
         # Handle button click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.button_rect.collidepoint(event.pos):
-                # Toggle NPC conversations on/off
-                self.game.npc_interactions_enabled = not self.game.npc_interactions_enabled
-                return  # Stop here → do NOT pass click through
-
+                # Only active after valley unlock
+                if "valley_paths_unlocked" in self.game.save_data.flags:
+                    self.game.push_state(ValleyMenuState(self.game))
+                return
         # If pass-through is enabled, forward the event to the state below
         if self.pass_through:
             self._forward_event(event)

@@ -29,7 +29,7 @@ bertha_trading = {
         # Cooler
         Dialogue(
             player,
-            "Purchase a Cooler for 5 fish",
+            "Purchase a Cooler for 3 fish",
             kind="choice",
             next_node="trade_cooler",
             associated_flag="purchased_extra_cooler"
@@ -38,7 +38,7 @@ bertha_trading = {
         # Salt
         Dialogue(
             player,
-            "Purchase Salt and Spice for 4 fish",
+            "Purchase Salt and Spice for 3 fish",
             kind="choice",
             next_node="trade_salt",
             associated_flag="purchased_salt"

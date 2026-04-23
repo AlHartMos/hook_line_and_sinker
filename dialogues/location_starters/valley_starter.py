@@ -64,3 +64,85 @@ valley_start = {
 
     "end": []
 }
+
+valley_intro_after_fish = {
+
+    "intro": [
+        Dialogue(
+            player,
+            "With your belly once again full, you begin to truly look around.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "Not far from you, there is a small isle near the base of the mountain.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "On it, you can make out a village.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "It lacks light, the only source coming from the narrow opening between the rocky mountain tops.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "The village seems empty…",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "But two things stand out.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "A shack with light coming from inside…",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "And someone moving inside another crooked structure.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "You have no idea what this place is doing here.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "But that is not your concern right now.",
+            kind="thought"
+        ),
+
+        Dialogue(
+            player,
+            "What matters is that you are no longer stranded with nothing but a splitting headache.",
+            kind="thought"
+        ),
+
+        # --- IMPORTANT FLAG UNLOCK ---
+        Dialogue(
+            player,
+            "You can now explore the village.",
+            kind="thought",
+            associated_flag="valley_paths_unlocked",
+            next_node="end"
+        )
+    ],
+
+    "end": []
+}

@@ -135,38 +135,38 @@ class FreeState(GameState):
     # is sitting on top of it and should stay in place.
     def _set_location(self, new_location):
         old_location = self.location
-    
+
         self.game.save_data.current_location = new_location
         self.location = new_location
         self.background = self._load_background()
         self.arrival_checked = False
-    
+
         # --- APPLY TRAVEL COST ---
         if old_location and new_location:
-        
+
             # Only apply between Lake (1) and Valley (2)
             if (
                 (old_location.id == 1 and new_location.id == 2) or
                 (old_location.id == 2 and new_location.id == 1)
             ):
                 travel_cost = getattr(self, "_pending_travel_cost", 0)
-    
+
                 self.game.save_data.energy = max(
                     0,
                     self.game.save_data.energy - travel_cost
                 )
-    
+
                 # --- ARRIVAL BUFFER ---
                 # Ensure player has at least 10 energy to fish
                 if self.game.save_data.energy < 10:
                     self.game.save_data.energy = 10
-    
+
                 # Feedback popup
                 self.game.save_data.pending_popup = {
                     "title": "Exhaustion",
                     "message": "The journey drained your energy."
                 }
-    
+
         # Clear stored cost after use
         self._pending_travel_cost = 0
 
@@ -237,6 +237,19 @@ class FreeState(GameState):
                     self.game,
                     title=popup["title"],
                     message=popup["message"]
+                )
+            )
+            return
+        
+        if getattr(self.game.save_data, "pending_dialogue", None):
+            data = self.game.save_data.pending_dialogue
+            self.game.save_data.pending_dialogue = None
+        
+            self.game.push_state(
+                DialogueState(
+                    self.game,
+                    data["conversation"],
+                    data["start_node"]
                 )
             )
             return

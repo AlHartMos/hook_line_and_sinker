@@ -206,7 +206,6 @@ class DialogueState(GameState):
                     self.game,
                     mode="trade",
                     trade_request=trade_request,
-                    return_node=trade_request["resume_node"]
                 )
             )
             return
