@@ -2,55 +2,62 @@ import pygame
 from states.base_state import GameState
 from states.dialogue_state import DialogueState
 
+
 class CoolerState(GameState):
     def __init__(self, game, mode="grid", trade_request=None):
         super().__init__(game)
 
-        # Modes:
-        # "grid"   → normal cooler browsing
-        # "detail" → inspect one fish
-        # "trade"  → select fish for trading
+        # Mode determines how the cooler behaves:
+        # "grid"   → normal inventory view
+        # "detail" → viewing one specific fish
+        # "trade"  → selecting fish for a trade
         self.mode = mode
 
-        # Trade data (only used in trade mode)
+        # Trade configuration passed from DialogueState (only used in trade mode)
         self.trade_request = trade_request
 
-        # Tracks selected fish indices during trading
+        # Stores indices of fish selected during trading
         self.selected_indices = set()
 
-        # Used for detail mode
+        # Index of currently selected fish (used in detail mode)
         self.selected_index = None
 
+        # Current location and background for visual consistency
         self.location = None
         self.background = None
 
-        # Fonts
+        # Fonts (initialized once in enter())
         self.title_font = None
         self.body_font = None
         self.small_font = None
         self.button_font = None
 
-        # Grid layout
+        # Grid layout settings
         self.grid_cols = 4
         self.slot_size = 120
         self.slot_gap = 18
         self.grid_rects = []
 
-        # Detail buttons
+        # Buttons for detail mode
         self.eat_button_rect = pygame.Rect(260, 600, 180, 54)
         self.release_button_rect = pygame.Rect(540, 600, 180, 54)
         self.return_button_rect = pygame.Rect(820, 600, 220, 54)
 
-        # Trade buttons
+        # Buttons for trade mode
         self.confirm_button_rect = pygame.Rect(500, 600, 180, 54)
         self.cancel_button_rect = pygame.Rect(720, 600, 180, 54)
 
-        # Back button
+        # Button to exit cooler
         self.return_to_free_button_rect = pygame.Rect(980, 30, 220, 54)
 
+        # Cached background image
         self.background_cache = None
 
     def enter(self):
+        """
+        Called when the cooler state is opened.
+        Loads background and initializes fonts.
+        """
         self.location = self.game.save_data.current_location
         self.background_cache = self._load_background()
 
@@ -61,6 +68,10 @@ class CoolerState(GameState):
             self.button_font = pygame.font.SysFont(None, 30)
 
     def _load_background(self):
+        """
+        Attempts to load the current location background.
+        Falls back to None if unavailable.
+        """
         if self.location and getattr(self.location, "image", None):
             try:
                 return self.game.load_image(self.location.image)
@@ -68,9 +79,13 @@ class CoolerState(GameState):
                 pass
         return None
 
-    # ---------- DATA ----------
+    # ---------- DATA HELPERS ----------
 
     def _get_entry_data(self, index):
+        """
+        Returns (catchable, mutation_level) for a cooler entry.
+        Supports both dict format and legacy format.
+        """
         entry = self.game.save_data.cooler[index]
 
         if isinstance(entry, dict):
@@ -79,17 +94,28 @@ class CoolerState(GameState):
         return entry, 0
 
     def _safe_stat_value(self, values, mutation):
+        """
+        Safely retrieves a stat value from a list using mutation level.
+        Prevents out-of-range errors.
+        """
         if not values:
             return 0
         return values[max(0, min(mutation, len(values) - 1))]
 
-    # ---------- TRADE ----------
+    # ---------- TRADE LOGIC ----------
 
     def _confirm_trade(self):
+        """
+        Handles trade confirmation:
+        - Checks if enough fish are selected
+        - Removes selected fish
+        - Grants item (via flag)
+        - Returns to dialogue
+        """
         required = self.trade_request.get("required_fish", 0)
 
         if len(self.selected_indices) < required:
-            # Not enough fish → go to failure dialogue
+            # Not enough fish → return to failure dialogue branch
             self.game.pop_state()
             self.game.push_state(
                 DialogueState(
@@ -100,14 +126,14 @@ class CoolerState(GameState):
             )
             return
 
-        # Remove selected fish
+        # Remove selected fish from cooler
         for idx in sorted(self.selected_indices, reverse=True):
             self.game.save_data.cooler.pop(idx)
 
-        # Set purchase flag
+        # Grant purchase flag
         self.game.save_data.flags.add(self.trade_request["purchase_flag"])
 
-        # Return to dialogue
+        # Return to dialogue (shop menu)
         self.game.pop_state()
         self.game.push_state(
             DialogueState(
@@ -117,9 +143,15 @@ class CoolerState(GameState):
             )
         )
 
-    # ---------- INPUT ----------
+    # ---------- INPUT HANDLING ----------
 
     def handle_event(self, event):
+        """
+        Handles all mouse input for:
+        - grid navigation
+        - trade selection
+        - detail actions
+        """
         if event.type == pygame.QUIT:
             self.game.running = False
             return
@@ -129,24 +161,29 @@ class CoolerState(GameState):
 
         # TRADE MODE
         if self.mode == "trade":
+            required = self.trade_request.get("required_fish", 0)
+
             for idx, rect in enumerate(self.grid_rects):
                 if rect.collidepoint(event.pos):
-                    # Toggle selection
+                    # Toggle selection, but cap at required amount
                     if idx in self.selected_indices:
                         self.selected_indices.remove(idx)
                     else:
-                        self.selected_indices.add(idx)
+                        if len(self.selected_indices) < required:
+                            self.selected_indices.add(idx)
                     return
 
+            # Confirm trade
             if self.confirm_button_rect.collidepoint(event.pos):
                 self._confirm_trade()
                 return
 
+            # Cancel trade
             if self.cancel_button_rect.collidepoint(event.pos):
                 self.game.pop_state()
                 return
 
-        # NORMAL GRID
+        # NORMAL GRID MODE
         elif self.mode == "grid":
             if self.return_to_free_button_rect.collidepoint(event.pos):
                 self.game.pop_state()
@@ -175,6 +212,12 @@ class CoolerState(GameState):
     # ---------- ACTIONS ----------
 
     def _eat_selected(self):
+        """
+        Eats the selected fish:
+        - Adds energy and mutation
+        - Applies milestone flags
+        - Removes fish
+        """
         catchable, mutation = self._get_entry_data(self.selected_index)
 
         energy = self._safe_stat_value(catchable.energy, mutation)
@@ -192,12 +235,19 @@ class CoolerState(GameState):
         self.game.pop_state()
 
     def _release_selected(self):
+        """
+        Removes the selected fish without reward.
+        """
         self.game.save_data.cooler.pop(self.selected_index)
         self.game.pop_state()
 
     # ---------- DRAW ----------
 
     def draw(self, screen):
+        """
+        Main draw dispatcher.
+        Chooses between grid and detail rendering.
+        """
         self._draw_background(screen)
 
         if self.mode in ("grid", "trade"):
@@ -206,6 +256,9 @@ class CoolerState(GameState):
             self._draw_detail(screen)
 
     def _draw_background(self, screen):
+        """
+        Draws the dimmed background behind the cooler UI.
+        """
         if self.background_cache:
             screen.blit(pygame.transform.scale(self.background_cache, screen.get_size()), (0, 0))
         else:
@@ -216,12 +269,18 @@ class CoolerState(GameState):
         screen.blit(overlay, (0, 0))
 
     def _draw_grid(self, screen):
+        """
+        Draws the fish grid:
+        - fish icons
+        - names
+        - selection highlights
+        - trade UI if active
+        """
         panel = pygame.Rect(60, 80, 1160, 560)
 
         pygame.draw.rect(screen, (18, 18, 24), panel, border_radius=18)
         pygame.draw.rect(screen, (255, 255, 255), panel, 2, border_radius=18)
 
-        # Capacity display
         cap = self.game.save_data._cooler_capacity()
         count = len(self.game.save_data.cooler)
 
@@ -254,16 +313,22 @@ class CoolerState(GameState):
 
         # Trade UI
         if self.mode == "trade":
-            required = self.trade_request["required_fish"]
+            required = self.trade_request.get("required_fish", 0)
             selected = len(self.selected_indices)
 
             count_text = self.small_font.render(f"{selected} / {required}", True, (255,255,255))
             screen.blit(count_text, (panel.centerx - 30, panel.y + 20))
 
-            self._draw_button(screen, self.confirm_button_rect, "Confirm")
+            # Grey out confirm if insufficient selection
+            color = (80,80,80) if selected < required else (40,40,60)
+
+            self._draw_button(screen, self.confirm_button_rect, "Confirm", color)
             self._draw_button(screen, self.cancel_button_rect, "Cancel")
 
     def _draw_detail(self, screen):
+        """
+        Draws the detailed view of a selected fish.
+        """
         panel = pygame.Rect(120, 70, 1040, 580)
 
         pygame.draw.rect(screen, (18,18,24), panel, border_radius=18)
@@ -278,9 +343,13 @@ class CoolerState(GameState):
         self._draw_button(screen, self.release_button_rect, "Release")
         self._draw_button(screen, self.return_button_rect, "Back")
 
-    def _draw_button(self, screen, rect, label):
-        pygame.draw.rect(screen, (40,40,60), rect, border_radius=12)
+    def _draw_button(self, screen, rect, label, fill_color=(40,40,60)):
+        """
+        Draws a standard UI button with text.
+        """
+        pygame.draw.rect(screen, fill_color, rect, border_radius=12)
         pygame.draw.rect(screen, (255,255,255), rect, 2, border_radius=12)
 
         text = self.button_font.render(label, True, (255,255,255))
         screen.blit(text, text.get_rect(center=rect.center))
+
