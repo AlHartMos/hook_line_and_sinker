@@ -1,6 +1,7 @@
 import pygame
 
 from states.base_state import GameState
+from states.cooler_state import CoolerState
 
 
 class DialogueState(GameState):
@@ -179,6 +180,23 @@ class DialogueState(GameState):
         if choice.flag:
             self.game.save_data.flags.add(choice.flag)
 
+        # Check if this choice triggers a trade
+        if hasattr(self.conversation, "_trade") and choice.next_node in self.conversation["_trade"]:
+            trade_request = self.conversation["_trade"][choice.next_node]
+
+            # Attach conversation reference for return
+            trade_request["conversation"] = self.conversation
+
+            self.game.push_state(
+                CoolerState(
+                    self.game,
+                    mode="trade",
+                    trade_request=trade_request,
+                    return_node=trade_request["resume_node"]
+                )
+            )
+            return
+        
         self.node = choice.next_node or "end"
         self.line_index = 0
 

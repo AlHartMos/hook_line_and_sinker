@@ -1,4 +1,4 @@
-from npc_interactions import Dialogue, hans, player, unknown
+from npc_interactions import Dialogue, hans, player
 
 meeting_hans_lake = {
     "intro": [
@@ -49,28 +49,28 @@ meeting_hans_lake = {
         Dialogue(
             player,
             "What is your name?",
-            kind="thought",
+            kind="choice",
             associated_flag="ask_hans_name_lake",
             next_node="ask_name"
         ),
         Dialogue(
             player,
             "And what the fuck do you want?",
-            kind="thought",
+            kind="choice",
             associated_flag="ask_hans_what_lake",
             next_node=""
         ),
         Dialogue(
             player,
             "Do you know what this place is?",
-            kind="thought",
+            kind="choice",
             associated_flag="ask_hans_where_lake",
             next_node="ask_where"
         ),
         Dialogue(
             player,
             "...",
-            kind="thought",
+            kind="choice",
             associated_flag="ask_hans_nothing_lake",
             next_node=""
         )
@@ -118,7 +118,9 @@ meeting_hans_lake = {
         Dialogue(
             player,
             "You got the point. He was a rocky mountain of stubbornness more annoying than that which was hovering over the whole village, and so you left him to do his business.",
-            kind="thought"
+            kind="thought",
+            associated_flag="meeting_hans_complete",
+            next_node="end"
         ),
         
     ],

@@ -296,7 +296,6 @@ meeting_bertha = {
         ),
     ],
 
-    # TO BE COMPLETED
     "bertha_end": [
         Dialogue(
             player,
@@ -372,6 +371,7 @@ meeting_bertha = {
             player,
             "You can visit her later, once you have some fish to trade.",
             kind="thought",
+            associated_flag="meeting_bertha_complete",
             next_node="end"
         )
     ],
