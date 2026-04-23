@@ -291,23 +291,19 @@ class FishingState(GameState):
 
             if self.cooler_button.collidepoint(event.pos):
                 capacity = self.game.save_data._cooler_capacity()
-                if len(self.game.save_data.cooler) < capacity():
 
-                    # Add fish normally
+                if len(self.game.save_data.cooler) < capacity:
                     self.game.save_data.cooler.append({
-                        "catchable": self.catch,
-                        "mutation": self.catch_mutation
+                    "catchable": self.catch,
+                    "mutation": self.catch_mutation
                     })
-
                     self.game.pop_state()
-
+                    
                 else:
-                    # Cooler is full → show popup
                     self.game.save_data.pending_popup = {
                         "title": "Cooler Full",
                         "message": "Your cooler is full. You cannot store more fish."
                     }
-
                     self.game.pop_state()
 
     # ---------- DRAW ----------

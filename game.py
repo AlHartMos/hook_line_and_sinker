@@ -104,7 +104,7 @@ class SaveData:
         capacity = 16
 
         # Upgrade doubles capacity
-        if "purchased_extra_cooler" in self.game.save_data.flags:
+        if "purchased_extra_cooler" in self.flags:
             capacity = 32
 
         return capacity

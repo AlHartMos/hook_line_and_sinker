@@ -287,6 +287,12 @@ class CoolerState(GameState):
         title = self.title_font.render("Cooler", True, (255, 255, 255))
         screen.blit(title, (panel.x + 24, panel.y + 18))
 
+        capacity = self.game.save_data._cooler_capacity()
+        count = len(self.game.save_data.cooler)
+
+        capacity_text = self.small_font.render(f"{count} / {capacity}", True, (255, 255, 255))
+        screen.blit(capacity_text, (panel.right - 90, panel.y + 22))
+
         # Return to FreeState button.
         self._draw_button(screen, self.return_to_free_button_rect, "Return to free state")
 
