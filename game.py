@@ -80,7 +80,8 @@ class SaveData:
         # Current game stats
         self.current_location = tutorial # Set current location
         self.flags = set() # list of things that have happened for story logic later on
-        self.cooler = [] # List of caught fish records with mutation info        self.mutation_level = 0 # Mutation level of the players
+        self.cooler = [] # List of caught fish records with mutation info        
+        self.mutation_level = 0 # Mutation level of the players
         self.energy = 100 # Current energy level
          
         # Used by FreeState to show a one-time system popup after another state finishes.

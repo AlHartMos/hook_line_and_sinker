@@ -1,11 +1,6 @@
 import pygame
 from states.base_state import GameState
 
-import pygame
-
-from states.base_state import GameState
-
-
 class PopupState(GameState):
     # This state is a reusable system popup.
     # It can show a short message with an OK button on top of the game world.
