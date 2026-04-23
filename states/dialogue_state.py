@@ -75,15 +75,14 @@ class DialogueState(GameState):
         return self.current_entries()
 
     # Decides what name should be shown above the dialogue.
-    # This keeps your hidden-name reveal behavior working.
     def get_display_name(self, dialogue):
         if dialogue is None or dialogue.character is None:
             return None
 
         npc = dialogue.character
 
-        if npc.hidden_name and dialogue.flag:
-            if dialogue.flag not in self.game.save_data.flags:
+        if npc.hidden_name and npc.reveal_flag:
+            if npc.reveal_flag not in self.game.save_data.flags:
                 return npc.hidden_name
 
         return npc.name
@@ -140,7 +139,13 @@ class DialogueState(GameState):
 
         # If the current line has a flag, store it now.
         if current.flag:
-            self.game.save_data.flags.add(current.flag)
+            if isinstance(current.flag, list):
+                # Add multiple flags
+                for f in current.flag:
+                    self.game.save_data.flags.add(f)
+            else:
+                # Add single flag
+                self.game.save_data.flags.add(current.flag)
 
         next_node = getattr(current, "next_node", None)
 

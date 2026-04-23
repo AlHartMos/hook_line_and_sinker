@@ -4,7 +4,7 @@ meeting_bertha = {
     "intro": [
         Dialogue(
             player,
-            "After reaching the house entrance door, the sound tells you that there must be a fireplace. Not too surprising in a place like this.",
+            "After reaching the house entrance door, the sound of a fireplace crackling. Not too surprising in a place like this.",
             kind="thought"
         ),
         Dialogue(
@@ -14,7 +14,7 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "Next few seconds pass in quiet of the wood chirping away, until you hear the creak of something being moved against the floor.",
+            "Next few seconds pass in quiet of a bird chirping in the distance, until you hear the creak of something being moved against the floor.",
             kind="thought"
         ),
         Dialogue(
@@ -24,7 +24,7 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "The female voice came from behind the door. Not having too much of any accent.",
+            "A feminine voice came from behind the door. She didn't seem to have any discernable accent.",
             kind="thought"
         ),
         Dialogue(
@@ -34,7 +34,7 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "Behind the entrance door stood a woman barely above 5 feet with a darker crimson red hood over her head. Short blond hair. Face of age with curvy nose, narrow barely pink lips, darker green eyes, oval ears and brows like two wings of falco. Yet an expression of a grandma famous for overfeeding her descendants.",
+            "Behind the entrance door stood a woman barely above 5 feet with a dark crimson red hood over her head. Short blond hair. Wrinkled face with curvy nose, narrow barely pink lips, dark green eyes, oval ears and brows like two wings of falcon. She looked like a grandma famous for overfeeding her descendants.",
             kind="thought"
         ),
         Dialogue(
@@ -48,28 +48,23 @@ meeting_bertha = {
             kind="npc"
         ),
         Dialogue(
-            player,
-            "Her voice was simple and on the lower pitch. Simple smile on the face.",
-            kind="thought"
-        ),
-        Dialogue(
             bertha,
-            "I won’t lie to you, but you look just like a wet cat after the rain. Please, come in.",
+            "I don't mean to offend, dear, but you look just like a wet cat after the rain. Please, come in.",
             kind="npc"
         ),
         Dialogue(
             player,
-            "Despite not being used to such kindness, you decided to follow inside the house due to truly being drenched from top to bottom.",
+            "Despite not being used to such kindness, you decided to follow inside the house. You were truly being drenched from top to bottom.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "It was comfortable inside. Around were a few shelves made of red wood, some photos sealed inside a golden looking frame. A pack of cards above the fireplace, with still crackling away wood below. Two armchairs one next to the fireplace in which you were settled under the plaid in red and black pattern, another close to the little round table by the counters acting as a kitchen. In the corner neatly made up bed.",
+            "It was comfortable inside. Around were a few shelves made of red wood, some photos sealed inside a golden frames. A pack of cards above the fireplace, with still crackling away wood below. Two armchairs, one next to the fireplace in a plaid red and black pattern, another close to the little round table by the counters acting as a kitchen. In the corner, a neatly made bed.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "The whole house which was simply a very large room",
+            "The whole house which was simply a very large room. You continue to observe as you settle into the armchair by the fireplace",
             kind="thought"
         ),
         Dialogue(
@@ -84,9 +79,9 @@ meeting_bertha = {
         ),
         Dialogue(
             bertha,
-            "Let’s start once again. I am Bertha. You are far from the only one that got here, although I have to admit, the visitors are rare and don’t stay here for too long.",
+            "Oh, where are my manners? Allow me to intoduce myself. I am Bertha. You are far from my first vistor, although I have to admit, they typically don’t stay here for too long.",
             kind="npc",
-            associated_flag="bertha_introduces_herself"
+            associated_flag="introduced_bertha"
         ),
         Dialogue(
             player,
@@ -95,7 +90,7 @@ meeting_bertha = {
         ),
         Dialogue(
             bertha,
-            "You know, it is very nice to see new faces from time to time. So don’t mind me if I may appear a bit weird.",
+            "I apologize if my mannarisms are a bit odd, it's been a long time since my last visitor. You know, it is very nice to see a new face.",
             kind="npc"
         ),
         Dialogue(
@@ -121,14 +116,14 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "Is there any electricity in here?",
+            "Do you have any electricity here?",
             kind="choice",
             associated_flag="ask_bertha_electricity",
             next_node="bertha_electricity"
         ),
         Dialogue(
             player,
-            "Who else lives here?",
+            "Does anyone else live here?",
             kind="choice",
             associated_flag="ask_bertha_companions",
             next_node="bertha_companions"
@@ -152,27 +147,27 @@ meeting_bertha = {
     "bertha_where": [
         Dialogue(
             bertha,
-            "You are in Anchuria now. It was in the past a little town with quite a few people living here, but lately only passersby, who go through the flow of the river, get in here.",
+            "You are in Anchuria now. In the past, it was a little town with quite a few people. Lately, there's only passersby, who go through the flow of the river.",
             kind="npc"
         ),
         Dialogue(
             player,
-            "You could swear that you were in the lake all this time, however, you don’t question her answer.",
+            "You could have sworn that you were still in the lake. However, you don’t question her answer.",
             kind="thought",
         ),
         Dialogue(
             player,
-            "Besides that you tried to remember whether you ever heard of the place, but to no avail.",
+            "You tried to remember whether you ever heard of Anchuria before, but to no avail.",
             kind="thought",
         ),
         Dialogue(
             bertha,
-            "I have lived here ever since birth, and I have to tell you it is a beautiful place.",
+            "I have lived here my whole life, and I have to tell you, it is a beautiful place.",
             kind="npc"
         ),
         Dialogue(
             bertha,
-            "Sure, the high mountains block off the sun most of the time, and yet the breath in here is simply incomparable, not that I have been to too many places to compare.",
+            "Sure, the mountains block off the sun most of the time, but the air in here is simply incomparable, not that I have been to many places to compare.",
             kind="npc"
         ),
         Dialogue(
@@ -187,7 +182,7 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "You sighed, carefully not to bring attention to it, yet the idea of eating only fish was hitting harder than one would wish.",
+            "You sighed, carefully not to bring attention to it, yet the idea of eating only fish was not very appealing.",
             kind="thought",
             next_node="questions"
         )
@@ -206,17 +201,17 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "By her sight it felt as if she heard the word electricity for the very first time. Although maybe no technology of the world has managed to reach this place.",
+            "It seemed like she had just heard the word electricity for the first time. Maybe no modern technology has managed to reach this place?",
             kind="thought"
         ),
         Dialogue(
             player,
-            "Despite the head hurting you still thought of how long the electricity was used.",
+            "Still, it has been a long time since electricity was introduced into human society.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "200 years maybe? And she has no clue of it?",
+            "200 years maybe? And she has never heard of it?",
             kind="thought"
         ),
         Dialogue(
@@ -230,42 +225,43 @@ meeting_bertha = {
     "bertha_companions": [
         Dialogue(
             bertha,
-            "Only Felix and Hans. There was a man called Selim, but he went along the flow…",
-            kind="npc"
+            "Only Felix and Hans. There was another man, Selim, but... he went along the flow…",
+            kind="npc",
+            associated_flag=["introduced_hans", "introduced_felix", "introduced_selim"]
         ),
         Dialogue(
             player,
-            "She paused looking down with slight sorrow. You understood what going down the flow meant, and gave her a moment.",
+            "She paused looking down, brows furrowing togther. You gave her a moment to greive.",
             kind="thought"
         ),
         Dialogue(
             bertha,
-            "Felix is native, been here for at least 20 years. He is a nice fellow, only very shy. I haven’t seen much of him in weeks, always closing the door and saying not to bother. But if you get to talk to him, he could appear to be quite nice.",
+            "Felix is practically native, been here for at least 20 years. He is very shy. I haven’t seen much of him in weeks, always closing the door and saying not to bother. But if you get to talk to him, you'll find he's a kind fellow",
             kind="npc"
         ),
         Dialogue(
             player,
-            "She then changed her expression slightly to a more upset look.",
+            "She then changed her expression slightly, radiating frustration and sadness.",
             kind="thought"
         ),
         Dialogue(
             bertha,
-            "I can’t say that about Hans though. He lives in a shackle by the water. You will see his belly and aggressive temper before anything else.",
+            "I can’t say that about Hans though. He lives in a shack by the water. You'll see his belly and aggressive temper before his shack though.",
             kind="npc"
         ),
         Dialogue(
             bertha,
-            "Better stay further from him. He is no good.",
+            "Best to stay away from him. He is no good.",
             kind="npc"
         ),
         Dialogue(
             player,
-            "Bertha rose slightly to check the kettle and probably got a pause to not talk about Hans.",
+            "Bertha rose slightly out of her armchair to check the kettle, and probably to show she was done talking about Hans.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "When she settled back there were no more mentions of either Felix or Hans.",
+            "When she settled back down, she didn't mention anyone else.",
             kind="thought",
             next_node="questions"
         ),
@@ -274,12 +270,12 @@ meeting_bertha = {
     "bertha_flow": [
         Dialogue(
             player,
-            "At that question Bertha became more concentrated on your face, as if trying to read what you were asking it for.",
+            "At that question Bertha concentrated on your face, as if trying to read why you were asking.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "However, a few seconds later she responded simply.",
+            "However, a few seconds later she responded.",
             kind="thought"
         ),
         Dialogue(
@@ -294,7 +290,7 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "Great. Now you were certainly stuck. Just as one would want to be a little dark scoop of land with only scenery being great black mountain peaks.",
+            "Great. Now you were certainly stuck here. In the dark valley. Just perfect.",
             kind="thought",
             next_node="questions"
         ),
@@ -304,12 +300,12 @@ meeting_bertha = {
     "bertha_end": [
         Dialogue(
             player,
-            "Half an hour or so later you are no longer feeling like a wet puppy.",
+            "About thirty minutes later you are feeling less like a wet puppy.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "The tea that Bertha made for you out of strange herbs that were growing around here was reminding you of white tea, only with a slight aftertaste of raspberry.",
+            "The tea that Bertha made for you out of strange herbs that were growing around here reminded you of white tea, only with a slight aftertaste of raspberry.",
             kind="thought"
         ),
         Dialogue(
@@ -324,17 +320,17 @@ meeting_bertha = {
         ),
         Dialogue(
             player,
-            "You appreciated her kindness a lot and yet felt as if you were overstaying welcome, which of course she will never admit, yet you were gentleman enough to know it.",
+            "You appreciated her kindness a lot, and felt as if you were overstaying welcome. Of, course she would never admit that, yet you were gentleman enough to know it was time to leave.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "You got out of an armchair carefully securing the plaid of the spot where you were sitting.",
+            "You got out of an armchair carefully, smoothing down the plaid fabric.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "Said your thanks to her and went to the exit door.",
+            "You said your thanks to her and went to the exit door.",
             kind="thought"
         ),
         Dialogue(
@@ -344,7 +340,7 @@ meeting_bertha = {
         ),
         Dialogue(
             bertha,
-            "Listen… I have a deal for you.",
+            "Listen… Would you like to make some trades?",
             kind="npc"
         ),
         Dialogue(
@@ -354,22 +350,22 @@ meeting_bertha = {
         ),
         Dialogue(
             bertha,
-            "I see you are a very nice person, much more let’s say accessible than others here, and I’m already a bit old for all the grappling through the water and catching the fish for food. So…",
+            "I see you are a very nice person, much more, let’s say, accessible than others here, and I’m already a bit old for all the grappling through the water and catching the fish for food. So…",
             kind="npc"
         ),
         Dialogue(
             bertha,
-            "If you would be so kind, when you’ll have time, get me some of it, and I promise I’ll find something good for you too. Afterall have to get used to each other.",
+            "If you would be so kind, when you have time, get me some fish, and I promise I’ll find something good for you too. Afterall, we have to get used to each other.",
             kind="npc"
         ),
         Dialogue(
             player,
-            "Your head nodded to her request earlier than you got to realize what she said.",
+            "Your head nodded to her request before you fully processed it.",
             kind="thought"
         ),
         Dialogue(
             player,
-            "With that you got back outside, into the pitch black surrounding with bare light hitting from far above.",
+            "With that you got back outside, into the pitch black surroundings with soft light hitting from far above.",
             kind="thought"
         ),
         Dialogue(
