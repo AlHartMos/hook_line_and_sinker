@@ -68,11 +68,11 @@ class ButtonOverlayState(GameState):
         if len(self.game.state_stack) >= 2:
             self.game.state_stack[-2].draw(screen)
 
-        # Decide button text based on toggle state
-        if self.game.npc_interactions_enabled:
-            text = "NPC Conversations: On"
+        # Change label based on whether valley is unlocked
+        if "valley_paths_unlocked" in self.game.save_data.flags:
+            text = "Explore Village"
         else:
-            text = "NPC Conversations: Off"
+            text = "..."
 
         # Draw button background
         pygame.draw.rect(screen, (35, 35, 50), self.button_rect, border_radius=10)

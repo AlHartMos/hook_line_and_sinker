@@ -24,7 +24,7 @@ class ValleyMenuState(GameState):
             self.options.append(("Go to shack", "meeting_hans"))
 
         # --- Bertha ---
-        if "asked_bertha_treasure" not in flags:
+        if "bertha_locked_out" not in flags:
             if "meeting_bertha_complete" not in flags:
                 self.options.append(("Go to house", "meeting_bertha"))
             elif "trading_with_bertha_complete" not in flags:
@@ -44,8 +44,19 @@ class ValleyMenuState(GameState):
                 if rect.collidepoint(event.pos):
                     label, node = self.options[i]
                     self.game.pop_state()
+                    conversation = self._get_conversation(node)
+
+                    # Special case for Felix
+                    if node == "felix_visit":
+                        if len(self.game.save_data.cooler) == 0:
+                            start_node = "no_fish"
+                        else:
+                            start_node = "intro"
+                    else:
+                        start_node = "intro"
+
                     self.game.push_state(
-                        DialogueState(self.game, self._get_conversation(node), "intro")
+                        DialogueState(self.game, conversation, start_node)
                     )
                     return
 

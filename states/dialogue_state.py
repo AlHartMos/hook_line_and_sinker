@@ -196,7 +196,7 @@ class DialogueState(GameState):
 
         # Check if this choice triggers a trade
         if "_trade" in self.conversation and choice.next_node in self.conversation["_trade"]:
-            trade_request = self.conversation["_trade"][choice.next_node]
+            trade_request = dict(self.conversation["_trade"][choice.next_node])
 
             # Attach conversation reference for return
             trade_request["conversation"] = self.conversation

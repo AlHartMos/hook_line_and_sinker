@@ -99,6 +99,7 @@ meeting_hans_lake = {
             hans,
             "None of your fucking business.",
             kind="npc",
+            next_node="questions"
         ),
         Dialogue(
             player,

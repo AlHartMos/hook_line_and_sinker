@@ -77,6 +77,7 @@ bertha_post_shop = {
             player,
             "You won’t return to Bertha again.",
             kind="thought",
+            associated_flag="bertha_locked_out",
             next_node="end"
         )
     ],
