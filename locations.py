@@ -55,7 +55,7 @@ cave = Location(
     [0.0, 1.0], 
     [0.0, 0.05, 0.05, 0.1, 0.8], 
     None, 
-    "dialogues/location_starters/cave_starter.py",
+    None,
     )
 
 lighthouse = Location(
@@ -85,7 +85,8 @@ valley = Location(
     [0.6, 0.3, 0.1, 0.0, 0.0], 
     "assets/Foggy_Lake.png", #Just for now
     valley_start,
-    next_location=forest
+    next_location=forest,
+    next_location_flag="felix_done"
     )
 
 lake = Location(
