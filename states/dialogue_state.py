@@ -73,7 +73,16 @@ class DialogueState(GameState):
     def current_choices(self):
         if not self.is_choice_node():
             return []
-        return self.current_entries()
+
+        choices = self.current_entries()
+
+        filtered = []
+        for c in choices:
+            if c.flag and c.flag in self.game.save_data.flags:
+                continue  # hide already purchased item
+            filtered.append(c)
+
+        return filtered
 
     # Decides what name should be shown above the dialogue.
     def get_display_name(self, dialogue):
@@ -226,9 +235,25 @@ class DialogueState(GameState):
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.advance()
 
-    # No timer-based logic is needed yet.
     def update(self, dt):
-        return
+        # Auto-redirect to "all_sold_out" if all shop items are purchased
+
+        # Only run this if the conversation has trading data
+        if "_trade" in self.conversation:
+
+            # Get all purchase flags from trade config
+            trade_flags = [
+                trade["purchase_flag"]
+                for trade in self.conversation["_trade"].values()
+        ]
+
+            # If ALL flags are present → everything is bought
+            if all(flag in self.game.save_data.flags for flag in trade_flags):
+
+                # Prevent infinite loop: only redirect if not already there
+                if self.node != "all_sold_out":
+                    self.node = "all_sold_out"
+                    self.line_index = 0
 
     # Draws either normal dialogue or the current choice screen.
     def draw(self, screen):
