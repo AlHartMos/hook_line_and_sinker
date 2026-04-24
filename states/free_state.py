@@ -145,10 +145,10 @@ class FreeState(GameState):
 
             # Only apply between Lake (1) and Valley (2)
             if (
-                (old_location.id == 1 and new_location.id == 2) or
-                (old_location.id == 2 and new_location.id == 1)
+                (old_location.id == 1 and new_location.id == 2)
             ):
                 travel_cost = getattr(self, "_pending_travel_cost", 0)
+                self.game.save_data.cooler = [] # Lose everything in the cooler
 
                 self.game.save_data.energy = max(
                     0,
