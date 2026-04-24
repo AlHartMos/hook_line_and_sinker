@@ -31,7 +31,7 @@ class CoolerState(GameState):
         self.button_font = None
 
         # Panel size
-        self.panel_rect = pygame.Rect(60, 80, 1160, 560)
+        self.panel_rect = pygame.Rect(60, 160, 1160, 320)
 
         # Grid layout settings
         self.grid_cols = 4
@@ -50,6 +50,10 @@ class CoolerState(GameState):
 
         # Button to exit cooler
         self.return_to_free_button_rect = pygame.Rect(980, 30, 220, 54)
+
+        # Buttons to move between pages
+        self.prev_button = pygame.Rect(120, 520, 80, 50)
+        self.next_button = pygame.Rect(1120, 520, 80, 50)
 
         # Cached background image
         self.background_cache = None
@@ -156,8 +160,10 @@ class CoolerState(GameState):
         dialogue.node = trade["resume_node"]
         dialogue.line_index = 0
 
-        # ---------- INPUT HANDLING ----------
+        # Clear selection
+        self.selected_indices.clear()
 
+    # ---------- INPUT HANDLING ----------
     def handle_event(self, event):
         if event.type == pygame.QUIT:
             self.game.running = False
@@ -177,6 +183,13 @@ class CoolerState(GameState):
             self.game.pop_state()
             return
         # ---------- TRADE MODE ----------
+        if self.confirm_button_rect.collidepoint(event.pos):
+            self._confirm_trade()
+            return
+        if self.cancel_button_rect.collidepoint(event.pos):
+            self.game.pop_state()
+            return
+        
         if self.mode == "trade":
             required = self.trade_request.get("required_fish", 0)
             start = self.page * self.items_per_page
@@ -217,8 +230,18 @@ class CoolerState(GameState):
             if self.return_button_rect.collidepoint(event.pos):
                 self.mode = "grid"
                 return
-    # ---------- ACTIONS ----------
+            
+        # Arrows
+        if self.prev_button.collidepoint(event.pos):
+            self.page = max(0, self.page - 1)
+            return
 
+        if self.next_button.collidepoint(event.pos):
+            max_page = (len(self.game.save_data.cooler) - 1) // self.items_per_page
+            self.page = min(max_page, self.page + 1)
+            return
+            
+    # ---------- ACTIONS ----------
     def _eat_selected(self):
         """
         Eats the selected fish:
@@ -361,6 +384,18 @@ class CoolerState(GameState):
 
             self._draw_button(screen, confirm_rect, "Confirm", color)
             self._draw_button(screen, cancel_rect, "Cancel")
+
+        # Page text
+        page_text = self.small_font.render(
+            f"{self.page + 1} / {max(1, (len(self.game.save_data.cooler)-1)//self.items_per_page + 1)}",
+            True,
+            (255,255,255)
+        )
+        screen.blit(page_text, (self.panel_rect.centerx - 20, self.panel_rect.bottom + 20))
+        
+        # Buttons
+        self._draw_button(screen, self.prev_button, "<")
+        self._draw_button(screen, self.next_button, ">")
 
     def _draw_detail(self, screen):
         """
