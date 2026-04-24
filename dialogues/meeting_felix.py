@@ -42,7 +42,7 @@ meeting_felix = {
 
         Dialogue(felix, "Huh… a… a… alright.", kind="npc"),
 
-        Dialogue(felix, "I… I… I’m Felix…", associated_flag="introduced_felix", kind="npc"),
+        Dialogue(felix, "I… I… I’m Felix…", associated_flag="introduced_felix", associated_flag="introduced_felix", kind="npc"),
 
         Dialogue(player, "You stepped closer.", kind="thought"),
 

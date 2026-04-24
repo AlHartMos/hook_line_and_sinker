@@ -80,6 +80,9 @@ class DialogueState(GameState):
             if c.text == "Ask about the treasure":
                 if "felix_revealed_treasure" not in self.game.save_data.flags:
                     continue
+            # Hide options taken before
+            if c.flag and c.flag in self.game.save_data.flags:
+               continue
             # Hide shop items based on trade config
             if "_trade" in self.conversation and c.next_node in self.conversation["_trade"]:
                 purchase_flag = self.conversation["_trade"][c.next_node]["purchase_flag"]
