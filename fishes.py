@@ -4,7 +4,7 @@ fish = []
 trash = []
 
 class Catchable():
-    def __init__(self, name, isFish: bool, fish_images, energy: list, mutation_score: list):
+    def __init__(self, name, isFish: bool, fish_images, energy: list, mutation_score: list, isConsumable = True):
         self.name = name # Name of the fish caught
 
         self.isFish = isFish
@@ -13,7 +13,7 @@ class Catchable():
             trash.append(self)
         else:
             fish.append(self)
-
+        self.consumable = isConsumable
         self.images = fish_images # List of the names of the fish assets for their base and mutated forms
         self.energy = energy # List of the amount of energy they give the player when eaten based on their mutation level
         self.mutation_score = mutation_score # List of how much each fish contributes to the player's mutation score based on their mutation level

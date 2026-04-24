@@ -310,8 +310,8 @@ class FishingState(GameState):
             return
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # Eat is only available for fish catches.
-            if self.catch is not None and self.catch.isFish:
+            # Eat is only available for consumable catches.
+            if self.catch is not None and self.catch.consumable:
                 if self.eat_button.collidepoint(event.pos):
                     self._eat_catch()
                     return
@@ -409,7 +409,7 @@ class FishingState(GameState):
         buttons.append(("Release", self.release_button))
 
         # Eat (only if fish or weeds)
-        if self.catch is not None and (self.catch.isFish or self.catch.name == "Lake Weed Cluster"):
+        if self.catch is not None and (self.catch.consumable):
             buttons.append(("Eat", self.eat_button))
 
         # Add to cooler
@@ -445,7 +445,7 @@ class FishingState(GameState):
     def _apply_eat_rewards(self):
         # Eating a fish gives the player energy and mutation progress.
         # The exact reward depends on the fish and its mutation level.
-        if self.catch is None or not getattr(self.catch, "isFish", False):
+        if self.catch is None or not getattr(self.catch, "consumable", False):
             return
     
         energy_gain = self._safe_stat_value(getattr(self.catch, "energy", []), self.catch_mutation)
@@ -474,7 +474,16 @@ class FishingState(GameState):
         center_x = panel.centerx
 
         button_y = panel.bottom - 100
-        spacing = 220
+
+        # Dynamic spacing
+        gap = 40
+        total_width = sum(rect.width for rect in buttons) + gap * (len(buttons) - 1)
+        start_x = center_x - total_width // 2
+
+        current_x = start_x
+        for rect in buttons:
+            rect.center = (current_x + rect.width // 2, button_y)
+            current_x += rect.width + gap
 
         buttons = []
 
@@ -482,14 +491,8 @@ class FishingState(GameState):
         buttons.append(self.release_button)
 
         # Eat
-        if self.catch is not None and (self.catch.isFish or self.catch.name == "Lake Weed Cluster"):
+        if self.catch is not None and (self.catch.consumable):
             buttons.append(self.eat_button)
 
         # Cooler
         buttons.append(self.cooler_button)
-
-        total_width = spacing * (len(buttons) - 1)
-        start_x = center_x - total_width // 2
-
-        for i, rect in enumerate(buttons):
-            rect.center = (start_x + i * spacing, button_y)
