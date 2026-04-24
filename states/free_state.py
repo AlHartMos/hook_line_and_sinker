@@ -247,6 +247,19 @@ class FreeState(GameState):
 
             return  # IMPORTANT: stop further updates this frame
         
+        if getattr(self.game.save_data, "pending_dialogue", None):
+            data = self.game.save_data.pending_dialogue
+            self.game.save_data.pending_dialogue = None
+
+            self.game.push_state(
+                DialogueState(
+                    self.game,
+                    data["conversation"],
+                    data["start_node"]
+                )
+            )
+            return
+        
         sd = self.game.save_data
 
         # --- ENERGY 0 → GAME OVER ---
