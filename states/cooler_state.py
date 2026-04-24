@@ -404,6 +404,28 @@ class CoolerState(GameState):
 
         catchable, mutation = self._get_entry_data(self.selected_index)
 
+        # --- DRAW FISH IMAGE ---
+        image = catchable.image_for_mutation(mutation)
+
+        if image:
+            try:
+                img = self.game.load_image(image)
+
+                img_size = 200
+                img_rect = pygame.Rect(
+                    panel.centerx - img_size // 2,
+                    panel.y + 80,
+                    img_size,
+                    img_size
+                )
+
+                scaled = pygame.transform.smoothscale(img, (img_size, img_size))
+                pygame.draw.rect(screen, (240, 240, 240), img_rect, 2, border_radius=10)
+                screen.blit(scaled, img_rect.topleft)
+
+            except:
+                pass
+
         title = self.title_font.render(catchable.name, True, (255,255,255))
         screen.blit(title, (panel.x + 24, panel.y + 20))
 
