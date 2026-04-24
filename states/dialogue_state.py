@@ -282,83 +282,71 @@ class DialogueState(GameState):
     # Draws NPC dialogue or player thoughts.
     def draw_dialogue_screen(self, screen):
         entry = self.current_entry()
-        if entry is None:
+        if entry is None:   
             return
 
         screen_w, screen_h = screen.get_size()
-        choices = self.current_choices()
 
-        button_h = 38
-        gap = 10
-        padding_top = 70
-        padding_bottom = 30
+        # --- INITIAL LAYOUT VALUES ---
+        padding_x = 24
+        padding_top = 20
+        padding_bottom = 40
+        line_height = 30
+        header_height = 40
 
-        panel_height = (
-            padding_top +
-            len(choices) * button_h +
-            (len(choices) - 1) * gap +
-            padding_bottom
-        )
-
-        screen_w, screen_h = screen.get_size()
-
-        # --- text width ---
-        text_x = 70 + 24
+        # --- FIRST PASS (no portrait yet) ---
+        text_x = 70 + padding_x
         max_width = screen_w - 140 - 60
 
         portrait = self.get_portrait(entry)
-        show_name = self.get_display_name(entry)
 
-        portrait_rect = pygame.Rect(
-            box.x + 20,
-            box.y - 180,
-            portrait_size,
-            portrait_size
-        )
+        # If portrait exists, reserve space for it
+        if getattr(entry, "kind", "npc") == "npc" and portrait is not None: 
+            portrait_size = 200
+            portrait_x = 70 + 20
+            text_x = portrait_x + portrait_size + 30
+            max_width = screen_w - text_x - 20
 
-        # Adjust for portrait
-        if getattr(entry, "kind", "npc") == "npc" and portrait is not None:
-            text_x = portrait_rect.right + 30
-            max_width = box.right - text_x - 20
+            # --- WRAP TEXT ---
+            lines = self.wrap_text(entry.text, self.body_font, max_width)
+            text_height = len(lines) * line_height
 
-        # --- wrap text ---
-        lines = self.wrap_text(entry.text, self.body_font, max_width)
+            # --- COMPUTE BOX SIZE ---
+            box_height = header_height + text_height + padding_top + padding_bottom
 
-        line_height = 30
-        text_height = len(lines) * line_height
-
-        # --- header space (name / thoughts) ---
-        header_height = 40
-
-        # --- padding ---
-        padding_top = 20
-        padding_bottom = 40
-
-        box_height = header_height + text_height + padding_top + padding_bottom
-
-        box = pygame.Rect(
-            70,
-            screen_h - box_height - 40,
-            screen_w - 140,
-            box_height
-        )
+            box = pygame.Rect(
+                70,
+                screen_h - box_height - 40,
+                screen_w - 140,
+                box_height
+            )
 
         pygame.draw.rect(screen, (15, 15, 20), box, border_radius=18)
         pygame.draw.rect(screen, (240, 240, 240), box, width=3, border_radius=18)
 
-        text_x = box.x + 24
+        # --- FINAL POSITIONS ---
+        text_x = box.x + padding_x
         text_top = box.y + padding_top + 10
 
+        # --- DRAW PORTRAIT ---
         if getattr(entry, "kind", "npc") == "npc" and portrait is not None:
             portrait_size = 200
-            portrait_rect = pygame.Rect(box.x + 20, box.y - 180, portrait_size, portrait_size)
+            portrait_rect = pygame.Rect(
+                box.x + 20,
+                box.y - 180,
+                portrait_size,
+                portrait_size
+            )
 
             scaled = pygame.transform.smoothscale(portrait, (portrait_size, portrait_size))
             pygame.draw.rect(screen, (245, 245, 245), portrait_rect, width=3, border_radius=10)
             screen.blit(scaled, portrait_rect.topleft)
 
             text_x = portrait_rect.right + 30
-            text_top = box.y + 22
+            text_top = box.y + padding_top
+
+        # --- NAME / THOUGHT LABEL ---
+        show_name = self.get_display_name(entry)
 
         if getattr(entry, "kind", "npc") == "npc" and show_name:
             name_surf = self.title_font.render(show_name, True, (255, 255, 255))
@@ -370,14 +358,15 @@ class DialogueState(GameState):
             screen.blit(tag, (text_x, text_top))
             text_top += 28
 
+        # --- DRAW TEXT ---
         for i, line in enumerate(lines):
             surf = self.body_font.render(line, True, (230, 230, 230))
-            screen.blit(surf, (text_x, text_top + i * 30))
+            screen.blit(surf, (text_x, text_top + i * line_height))
 
+        # --- HINT ---
         hint = self.small_font.render("Space / click to continue", True, (180, 180, 180))
-        screen.blit(hint, (box.right - hint.get_width() - 18, box.bottom - 30))
+        screen.blit(hint, (box.right - hint.get_width() - 18, box.bottom - 30))    # Draws a choice screen for the current node.
 
-    # Draws a choice screen for the current node.
     def draw_choice_screen(self, screen):
         screen_w, screen_h = screen.get_size()
         choices = self.current_choices()
