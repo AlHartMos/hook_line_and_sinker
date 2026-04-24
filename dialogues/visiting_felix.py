@@ -109,8 +109,9 @@ felix_visit = {
 
 felix_visit["_trade"] = {
     "trade_felix": {
-        "required_fish": 0,  # per visit
-        "total_required": 10,  # cumulative goal
+        "required_fish": 1,          # must give at least 1 per visit
+        "total_required": 10,        # total goal
+        "purchase_flag": None,       # Felix doesn’t use item flags
         "fail_node": "not_enough_total",
         "success_node": "enough_total"
     }

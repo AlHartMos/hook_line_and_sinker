@@ -252,20 +252,16 @@ class DialogueState(GameState):
 
         # Only run this if the conversation has trading data
         if "_trade" in self.conversation:
+            trades = self.conversation["_trade"].values()
 
-            # Get all purchase flags from trade config
-            trade_flags = [
-                trade["purchase_flag"]
-                for trade in self.conversation["_trade"].values()
-        ]
+            # Only run auto "all_sold_out" logic if ALL trades have purchase_flag
+            if all("purchase_flag" in t for t in trades):
+                trade_flags = [t["purchase_flag"] for t in trades]
 
-            # If ALL flags are present → everything is bought
-            if all(flag in self.game.save_data.flags for flag in trade_flags):
-
-                # Prevent infinite loop: only redirect if not already there
-                if self.node != "all_sold_out":
-                    self.node = "all_sold_out"
-                    self.line_index = 0
+                if all(flag in self.game.save_data.flags for flag in trade_flags):
+                    if self.node != "all_sold_out":
+                        self.node = "all_sold_out"
+                        self.line_index = 0
 
     # Draws either normal dialogue or the current choice screen.
     def draw(self, screen):

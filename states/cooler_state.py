@@ -113,72 +113,83 @@ class CoolerState(GameState):
 
     def _confirm_trade(self):
         trade = self.trade_request
+    
         required = trade.get("required_fish", 0)
         total_required = trade.get("total_required", None)
-
+        purchase_flag = trade.get("purchase_flag", None)
+    
         selected = list(self.selected_indices)
-
-        # --- NOT ENOUGH (per-visit) ---
+    
+        # --- NOTHING SELECTED ---
+        if len(selected) == 0:
+            return
+    
+        # --- NOT ENOUGH FOR THIS INTERACTION ---
         if len(selected) < required:
             self.game.pop_state()
-            dialogue = None
-            for state in reversed(self.game.state_stack):
-                from states.dialogue_state import DialogueState
-                if isinstance(state, DialogueState):
-                    dialogue = state
-                    break
+    
+            # Return to dialogue fail node
+            dialogue = next(
+                (s for s in reversed(self.game.state_stack)
+                 if s.__class__.__name__ == "DialogueState"),
+                None
+            )
+    
             if dialogue:
-                dialogue.node = trade["resume_node"]
+                dialogue.node = trade["fail_node"]
                 dialogue.line_index = 0
+    
             return
-
-        # --- REMOVE FISH ---
+    
+        # --- REMOVE SELECTED FISH ---
         for idx in sorted(selected, reverse=True):
             self.game.save_data.cooler.pop(idx)
-
-        # --- FELIX CUMULATIVE LOGIC ---
+    
+        # --- CUMULATIVE (FELIX) ---
         if total_required is not None:
             if not hasattr(self.game.save_data, "felix_fish_given"):
                 self.game.save_data.felix_fish_given = 0
-
+    
             self.game.save_data.felix_fish_given += len(selected)
-
+    
             if self.game.save_data.felix_fish_given >= total_required:
                 next_node = trade["success_node"]
             else:
                 next_node = trade["fail_node"]
-
+    
             self.game.pop_state()
-
-            dialogue = None
-            for state in reversed(self.game.state_stack):
-                from states.dialogue_state import DialogueState
-                if isinstance(state, DialogueState):
-                    dialogue = state
-                    break
+    
+            dialogue = next(
+                (s for s in reversed(self.game.state_stack)
+                 if s.__class__.__name__ == "DialogueState"),
+                None
+            )
+    
             if dialogue:
-                dialogue.node = trade["resume_node"]
+                dialogue.node = next_node
                 dialogue.line_index = 0
+    
+            self.selected_indices.clear()
             return
-
-        # --- STANDARD PURCHASE (Bertha) ---
-        self.game.save_data.flags.add(trade["purchase_flag"])
-
+    
+        # --- STANDARD PURCHASE (BERTHA) ---
+        if purchase_flag:
+            self.game.save_data.flags.add(purchase_flag)
+    
         self.game.pop_state()
-
-        dialogue = None
-        for state in reversed(self.game.state_stack):
-            from states.dialogue_state import DialogueState
-            if isinstance(state, DialogueState):
-                dialogue = state
-                break
+    
+        dialogue = next(
+            (s for s in reversed(self.game.state_stack)
+             if s.__class__.__name__ == "DialogueState"),
+            None
+        )
+    
         if dialogue:
-            dialogue.node = trade["resume_node"]
+            dialogue.node = trade["success_node"]
             dialogue.line_index = 0
-
-        # Clear selection
+    
         self.selected_indices.clear()
-
+    
     # ---------- INPUT HANDLING ----------
     def handle_event(self, event):
         if event.type == pygame.QUIT:
