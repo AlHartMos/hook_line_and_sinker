@@ -475,6 +475,15 @@ class FishingState(GameState):
 
         button_y = panel.bottom - 100
 
+        buttons = []
+        # Release
+        buttons.append(self.release_button)
+        # Eat
+        if self.catch is not None and (self.catch.consumable):
+            buttons.append(self.eat_button)
+        # Cooler
+        buttons.append(self.cooler_button)
+
         # Dynamic spacing
         gap = 40
         total_width = sum(rect.width for rect in buttons) + gap * (len(buttons) - 1)
@@ -484,15 +493,3 @@ class FishingState(GameState):
         for rect in buttons:
             rect.center = (current_x + rect.width // 2, button_y)
             current_x += rect.width + gap
-
-        buttons = []
-
-        # Release
-        buttons.append(self.release_button)
-
-        # Eat
-        if self.catch is not None and (self.catch.consumable):
-            buttons.append(self.eat_button)
-
-        # Cooler
-        buttons.append(self.cooler_button)
