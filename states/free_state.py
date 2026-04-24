@@ -236,7 +236,7 @@ class FreeState(GameState):
             self.location is not None
             and self.location.id == 2
             and self.game.save_data.energy >= 78
-            and "valley_intro_played" not in self.game.save_data.flags
+            and "valley_paths_unlocked" not in self.game.save_data.flags
         ):
             self.game.save_data.flags.add("valley_paths_unlocked")
 
