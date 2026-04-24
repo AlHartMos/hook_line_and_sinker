@@ -54,9 +54,9 @@ class CoolerState(GameState):
         # Cached background image
         self.background_cache = None
 
-        # Scrolling mechanic
-        self.scroll_offset = 0
-        self.max_scroll = 0
+        # Page mechanic
+        self.page = 0
+        self.items_per_page = self.grid_cols  # 4 items per page (1 row)
 
     def enter(self):
         """
@@ -110,167 +110,131 @@ class CoolerState(GameState):
     # ---------- TRADE LOGIC ----------
 
     def _confirm_trade(self):
-        from states.dialogue_state import DialogueState
-        """
-        Handles trade confirmation for BOTH:
-        - Standard trades (Bertha)
-        - Cumulative trades (Felix)
-
-        Behavior:
-        - Removes selected fish
-        - Applies either:
-            • single purchase (flag)
-            • cumulative progress (Felix)
-            - Returns to appropriate dialogue node
-            """
-        
         trade = self.trade_request
-
         required = trade.get("required_fish", 0)
-        total_required = trade.get("total_required", None)  # Felix-only
-
-        selected_count = len(self.selected_indices)
-
-        # --- NOTHING SELECTED ---
-        if selected_count == 0:
+        total_required = trade.get("total_required", None)
+    
+        selected = list(self.selected_indices)
+    
+        # --- NOT ENOUGH (per-visit) ---
+        if len(selected) < required:
             self.game.pop_state()
+            dialogue = self.game.state
+            dialogue.node = trade["fail_node"]
+            dialogue.line_index = 0
             return
-
-        # --- STANDARD TRADE CHECK (Bertha) ---
-        # Only enforce required_fish if NOT a cumulative trade
-        if selected_count < required:
-            self.game.pop_state()  # remove CoolerState
-
-            # return to previous DialogueState
-            dialogue_state = self.game.state
-
-            dialogue_state.node = trade["resume_node"]
-            dialogue_state.line_index = 0
-            return
-
-        # --- REMOVE SELECTED FISH ---
-        for idx in sorted(self.selected_indices, reverse=True):
+    
+        # --- REMOVE FISH ---
+        for idx in sorted(selected, reverse=True):
             self.game.save_data.cooler.pop(idx)
-
-        # =========================================================
-        # =============== FELIX CUMULATIVE LOGIC ==================
-        # =========================================================
+    
+        # --- FELIX CUMULATIVE LOGIC ---
         if total_required is not None:
-            # Initialize if not present
             if not hasattr(self.game.save_data, "felix_fish_given"):
                 self.game.save_data.felix_fish_given = 0
-
-            # Add to total
-            self.game.save_data.felix_fish_given += selected_count
-
-            # Check if enough TOTAL fish has been given
+    
+            self.game.save_data.felix_fish_given += len(selected)
+    
             if self.game.save_data.felix_fish_given >= total_required:
                 next_node = trade["success_node"]
             else:
                 next_node = trade["fail_node"]
-
+    
             self.game.pop_state()
-
-            self.game.push_state(
-                DialogueState(
-                    self.game,
-                    trade["conversation"],
-                    next_node
-                )
-            )
+    
+            dialogue = self.game.state
+            dialogue.node = next_node
+            dialogue.line_index = 0
             return
-
-        # =========================================================
-        # =============== STANDARD TRADE LOGIC ====================
-        # =========================================================
-
-        # Grant purchase flag (Bertha-style)
+    
+        # --- STANDARD PURCHASE (Bertha) ---
         self.game.save_data.flags.add(trade["purchase_flag"])
-
+    
         self.game.pop_state()
-
-        self.game.push_state(
-            DialogueState(
-                self.game,
-                trade["conversation"],
-                trade["resume_node"]
-            )
-        )
-
-    # ---------- INPUT HANDLING ----------
-
-    def handle_event(self, event):
-        if event.type == pygame.QUIT:
-            self.game.running = False
-            return
-
-        # --- SCROLLING ---
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 4:  # scroll up
-                self.scroll_offset = max(0, self.scroll_offset - 40)
+    
+        dialogue = self.game.state
+        dialogue.node = trade["resume_node"]
+        dialogue.line_index = 0
+    
+        # ---------- INPUT HANDLING ----------
+    
+        def handle_event(self, event):
+            if event.type == pygame.QUIT:
+                self.game.running = False
                 return
-            elif event.button == 5:  # scroll down
-                self.scroll_offset = min(self.max_scroll, self.scroll_offset + 40)
+    
+            # --- PAGES ---
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    max_page = (len(self.game.save_data.cooler) - 1) // self.items_per_page
+                    self.page = min(max_page, self.page + 1)
+    
+                elif event.key == pygame.K_LEFT:
+                    self.page = max(0, self.page - 1)
+    
+            # --- ONLY handle left click from here on ---
+            if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
                 return
-
-        # --- ONLY handle left click from here on ---
-        if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
-            return
-
-        # --- CLICK OUTSIDE PANEL ---
-        if not self.panel_rect.collidepoint(event.pos):
-            self.game.pop_state()
-            return
-
-        # ---------- TRADE MODE ----------
-        if self.mode == "trade":
-            required = self.trade_request.get("required_fish", 0)
-
-            for idx, rect in enumerate(self.grid_rects):
-                if rect.collidepoint(event.pos):
-                    if idx in self.selected_indices:
-                        self.selected_indices.remove(idx)
-                    else:
-                        if len(self.selected_indices) < required:
-                            self.selected_indices.add(idx)
-                    return
-
-            if self.confirm_button_rect.collidepoint(event.pos):
-                self._confirm_trade()
-                return
-
-            if self.cancel_button_rect.collidepoint(event.pos):
+    
+            # --- CLICK OUTSIDE PANEL ---
+            if not self.panel_rect.collidepoint(event.pos):
                 self.game.pop_state()
                 return
-
-        # ---------- GRID MODE ----------
-        elif self.mode == "grid":
-            if self.return_to_free_button_rect.collidepoint(event.pos):
-                self.game.pop_state()
-                return
-
-            for idx, rect in enumerate(self.grid_rects):
-                if rect.collidepoint(event.pos):
-                    self.selected_index = idx
-                    self.mode = "detail"
+    
+            # ---------- TRADE MODE ----------
+            if self.mode == "trade":
+                required = self.trade_request.get("required_fish", 0)
+    
+                start = self.page * self.items_per_page
+    
+                for idx, rect in enumerate(self.grid_rects):
+                    if rect.collidepoint(event.pos):
+                        real_index = start + idx
+    
+                        if real_index in self.selected_indices:
+                            self.selected_indices.remove(real_index)
+                        else:
+                            if len(self.selected_indices) < required:
+                                self.selected_indices.add(real_index)
+                        return
+    
+                if self.confirm_button_rect.collidepoint(event.pos):
+                    self._confirm_trade()
                     return
-
-        # ---------- DETAIL MODE ----------
-        elif self.mode == "detail":
-            if self.eat_button_rect.collidepoint(event.pos):
-                self._eat_selected()
-                return
-
-            if self.release_button_rect.collidepoint(event.pos):
-                self._release_selected()
-                return
-
-            if self.return_button_rect.collidepoint(event.pos):
-                self.mode = "grid"
-                return
-
-    # ---------- ACTIONS ----------
-
+    
+                if self.cancel_button_rect.collidepoint(event.pos):
+                    self.game.pop_state()
+                    return
+    
+            # ---------- GRID MODE ----------
+            elif self.mode == "grid":
+                if self.return_to_free_button_rect.collidepoint(event.pos):
+                    self.game.pop_state()
+                    return
+    
+                for idx, rect in enumerate(self.grid_rects):
+                    if rect.collidepoint(event.pos):
+                        start = self.page * self.items_per_page
+                        self.selected_index = start + idx
+                        self.mode = "detail"
+                        return
+    
+            # ---------- DETAIL MODE ----------
+            elif self.mode == "detail":
+                if self.eat_button_rect.collidepoint(event.pos):
+                    self._eat_selected()
+                    return
+    
+                if self.release_button_rect.collidepoint(event.pos):
+                    self._release_selected()
+                    return
+    
+                if self.return_button_rect.collidepoint(event.pos):
+                    self.mode = "grid"
+                    return
+    
+        # ---------- ACTIONS ----------
+    
     def _eat_selected(self):
         """
         Eats the selected fish:
@@ -343,7 +307,12 @@ class CoolerState(GameState):
 
         self.grid_rects = []
 
-        for i, entry in enumerate(self.game.save_data.cooler):
+        # Visible items on the page
+        start = self.page * self.items_per_page
+        end = start + self.items_per_page
+        visible_items = self.game.save_data.cooler[start:end]
+
+        for i, entry in enumerate(visible_items):
             x = panel.x + 24 + (i % 4) * (self.slot_size + self.slot_gap)
             y = panel.y + 80 + (i // 4) * (self.slot_size + 100) - self.scroll_offset
 
@@ -362,8 +331,8 @@ class CoolerState(GameState):
                 img_y = y + (self.slot_size - img_size) // 2
 
                 screen.blit(pygame.transform.scale(img, (img_size, img_size)), (img_x, img_y))
-                name = self.small_font.render(catchable.name, True, (255,255,255))
-                screen.blit(name, (x, y + self.slot_size + 10))
+            name = self.small_font.render(catchable.name, True, (255,255,255))
+            screen.blit(name, (x, y + self.slot_size + 10))
 
             if self.mode == "trade" and i in self.selected_indices:
                 pygame.draw.rect(screen, (255,215,0), rect, 3)
