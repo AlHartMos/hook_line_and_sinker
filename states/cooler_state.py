@@ -32,8 +32,8 @@ class CoolerState(GameState):
 
         # Grid layout settings
         self.grid_cols = 4
-        self.slot_size = 120
-        self.slot_gap = 18
+        self.slot_size = 240
+        self.slot_gap = 30
         self.grid_rects = []
 
         # Buttons for detail mode
@@ -333,7 +333,7 @@ class CoolerState(GameState):
 
         for i, entry in enumerate(self.game.save_data.cooler):
             x = panel.x + 24 + (i % 4) * (self.slot_size + self.slot_gap)
-            y = panel.y + 80 + (i // 4) * (self.slot_size + 60)
+            y = panel.y + 80 + (i // 4) * (self.slot_size + 100)
 
             rect = pygame.Rect(x, y, self.slot_size, self.slot_size)
             self.grid_rects.append(rect)
@@ -345,10 +345,13 @@ class CoolerState(GameState):
             image = catchable.image_for_mutation(mutation)
             if image:
                 img = self.game.load_image(image)
-                screen.blit(pygame.transform.scale(img, (220,220)), (x+5,y+5))
+                img_size = 220
+                img_x = x + (self.slot_size - img_size) // 2
+                img_y = y + (self.slot_size - img_size) // 2
 
-            name = self.small_font.render(catchable.name, True, (255,255,255))
-            screen.blit(name, (x, y+125))
+                screen.blit(pygame.transform.scale(img, (img_size, img_size)), (img_x, img_y))
+                name = self.small_font.render(catchable.name, True, (255,255,255))
+                screen.blit(name, (x, y + self.slot_size + 10))
 
             if self.mode == "trade" and i in self.selected_indices:
                 pygame.draw.rect(screen, (255,215,0), rect, 3)

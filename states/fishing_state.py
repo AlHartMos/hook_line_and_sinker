@@ -363,7 +363,13 @@ class FishingState(GameState):
         screen_w, screen_h = screen.get_size()
 
         # --- MAIN PANEL ---
-        panel = pygame.Rect(160, 120, screen_w - 320, screen_h - 240)
+        panel_height = 520
+        panel = pygame.Rect(
+            160,
+            (screen_h - panel_height) // 2,
+            screen_w - 240,
+            panel_height
+        )
 
         pygame.draw.rect(screen, (18, 18, 24), panel, border_radius=20)
         pygame.draw.rect(screen, (255, 255, 255), panel, 2, border_radius=20)
@@ -398,7 +404,7 @@ class FishingState(GameState):
         # --- BUTTONS (horizontal, centered) ---
         button_y = min(text_y + 100, panel.bottom - 60)        
         spacing = 260
-        
+
         buttons = []
 
         # Release (always)
