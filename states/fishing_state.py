@@ -386,7 +386,7 @@ class FishingState(GameState):
             pygame.draw.rect(screen, (240, 240, 240), img_rect, 2, border_radius=10)
             screen.blit(scaled, img_rect.topleft)
         
-            text_y = img_rect.bottom + 20  # reduce spacing slightly        
+            text_y = img_rect.bottom + 40 
         else:
             text_y = panel.y + 40
 
@@ -396,9 +396,9 @@ class FishingState(GameState):
         screen.blit(title_surf, title_rect)
 
         # --- BUTTONS (horizontal, centered) ---
-        button_y = min(text_y + 80, panel.bottom - 60)
+        button_y = min(text_y + 100, panel.bottom - 60)        
         spacing = 260
-
+        
         buttons = []
 
         # Release (always)
