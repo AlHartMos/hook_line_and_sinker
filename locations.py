@@ -46,7 +46,7 @@ class Location:
         return np.random.choice([0, 1, 2, 3, 4], p=self.mutation_rates)
 
     def is_fish(self):
-        return np.random.choice([False, True], self.trash_fish_ratio)    
+        return np.random.choice([False, True], p=self.trash_fish_ratio)    
 
 # Defining the locations
 cave = Location(
