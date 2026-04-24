@@ -238,7 +238,7 @@ class FreeState(GameState):
             and self.game.save_data.energy >= 78
             and "valley_intro_played" not in self.game.save_data.flags
         ):
-            self.game.save_data.flags.add("valley_intro_played")
+            self.game.save_data.flags.add("valley_paths_unlocked")
 
             self.game.save_data.pending_dialogue = {
                 "conversation": valley_intro_after_fish,
