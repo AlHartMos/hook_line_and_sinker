@@ -62,7 +62,7 @@ class FishingState(GameState):
         self.phase_started_at = pygame.time.get_ticks()
 
         if self.title_font is None:
-            self.title_font = pygame.font.SysFont(None, 54)
+            self.title_font = pygame.font.SysFont(None, 34)
             self.body_font = pygame.font.SysFont(None, 34)
             self.button_font = pygame.font.SysFont(None, 30)
         self.small_font = pygame.font.SysFont(None, 24)
