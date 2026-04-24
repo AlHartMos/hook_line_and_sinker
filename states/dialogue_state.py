@@ -267,6 +267,11 @@ class DialogueState(GameState):
         else:
             screen.fill((20, 24, 34))
 
+        # Dim background while in dialogue state
+        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 120))
+        screen.blit(overlay, (0, 0))
+
         if self.is_choice_node():
             self.draw_choice_screen(screen)
         else:
