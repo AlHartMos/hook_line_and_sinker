@@ -363,7 +363,7 @@ class FishingState(GameState):
         screen_w, screen_h = screen.get_size()
 
         # --- MAIN PANEL ---
-        panel_height = 520
+        panel_height = 560
         panel = pygame.Rect(
             160,
             (screen_h - panel_height) // 2,
