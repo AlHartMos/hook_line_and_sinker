@@ -31,7 +31,7 @@ class CoolerState(GameState):
         self.button_font = None
 
         # Panel size
-        self.panel_rect = pygame.Rect(60, 160, 1160, 320)
+        self.panel_rect = pygame.Rect(60, 160, 1160, 420)
 
         # Grid layout settings
         self.grid_cols = 4
@@ -50,17 +50,15 @@ class CoolerState(GameState):
 
         # Button to exit cooler
         self.return_to_free_button_rect = pygame.Rect(980, 30, 220, 54)
-
-        # Buttons to move between pages
-        self.prev_button = pygame.Rect(120, 520, 80, 50)
-        self.next_button = pygame.Rect(1120, 520, 80, 50)
-
+        
         # Cached background image
         self.background_cache = None
 
         # Page mechanic
         self.page = 0
         self.items_per_page = self.grid_cols  # 4 items per page (1 row)
+        self.prev_button = pygame.Rect(0, 0, 80, 40)
+        self.next_button = pygame.Rect(0, 0, 80, 40)
 
     def enter(self):
         """
@@ -123,9 +121,15 @@ class CoolerState(GameState):
         # --- NOT ENOUGH (per-visit) ---
         if len(selected) < required:
             self.game.pop_state()
-            dialogue = self.game.state
-            dialogue.node = trade["fail_node"]
-            dialogue.line_index = 0
+            dialogue = None
+            for state in reversed(self.game.state_stack):
+                from states.dialogue_state import DialogueState
+                if isinstance(state, DialogueState):
+                    dialogue = state
+                    break
+            if dialogue:
+                dialogue.node = trade["resume_node"]
+                dialogue.line_index = 0
             return
 
         # --- REMOVE FISH ---
@@ -146,9 +150,15 @@ class CoolerState(GameState):
 
             self.game.pop_state()
 
-            dialogue = self.game.state
-            dialogue.node = next_node
-            dialogue.line_index = 0
+            dialogue = None
+            for state in reversed(self.game.state_stack):
+                from states.dialogue_state import DialogueState
+                if isinstance(state, DialogueState):
+                    dialogue = state
+                    break
+            if dialogue:
+                dialogue.node = trade["resume_node"]
+                dialogue.line_index = 0
             return
 
         # --- STANDARD PURCHASE (Bertha) ---
@@ -156,9 +166,15 @@ class CoolerState(GameState):
 
         self.game.pop_state()
 
-        dialogue = self.game.state
-        dialogue.node = trade["resume_node"]
-        dialogue.line_index = 0
+        dialogue = None
+        for state in reversed(self.game.state_stack):
+            from states.dialogue_state import DialogueState
+            if isinstance(state, DialogueState):
+                dialogue = state
+                break
+        if dialogue:
+            dialogue.node = trade["resume_node"]
+            dialogue.line_index = 0
 
         # Clear selection
         self.selected_indices.clear()
@@ -178,18 +194,7 @@ class CoolerState(GameState):
         # --- ONLY handle left click from here on ---
         if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
             return
-        # --- CLICK OUTSIDE PANEL ---
-        if not self.panel_rect.collidepoint(event.pos):
-            self.game.pop_state()
-            return
         # ---------- TRADE MODE ----------
-        if self.confirm_button_rect.collidepoint(event.pos):
-            self._confirm_trade()
-            return
-        if self.cancel_button_rect.collidepoint(event.pos):
-            self.game.pop_state()
-            return
-        
         if self.mode == "trade":
             required = self.trade_request.get("required_fish", 0)
             start = self.page * self.items_per_page
@@ -230,6 +235,12 @@ class CoolerState(GameState):
             if self.return_button_rect.collidepoint(event.pos):
                 self.mode = "grid"
                 return
+        # Only exit if NOT interacting with UI
+        if self.mode == "grid":
+            if not self.panel_rect.collidepoint(event.pos) and not self.return_to_free_button_rect.collidepoint(event.pos):
+                self.game.pop_state()
+                return
+
             
         # Arrows
         if self.prev_button.collidepoint(event.pos):
@@ -302,6 +313,10 @@ class CoolerState(GameState):
     def _draw_grid(self, screen):
         panel = self.panel_rect
 
+        # Position page buttons relative to panel
+        self.prev_button.topleft = (panel.x + 40, panel.bottom - 60)
+        self.next_button.topleft = (panel.right - 120, panel.bottom - 60)
+
         pygame.draw.rect(screen, (18, 18, 24), panel, border_radius=18)
         pygame.draw.rect(screen, (255, 255, 255), panel, 2, border_radius=18)
 
@@ -321,7 +336,7 @@ class CoolerState(GameState):
 
         for i, entry in enumerate(visible_items):
             x = panel.x + 24 + (i % 4) * (self.slot_size + self.slot_gap)
-            y = panel.y + 80 + (i // 4) * (self.slot_size + 100)
+            y = panel.y + 60 + (i // 4) * (self.slot_size + 100)
 
             rect = pygame.Rect(x, y, self.slot_size, self.slot_size)
             self.grid_rects.append(rect)
@@ -391,7 +406,7 @@ class CoolerState(GameState):
             True,
             (255,255,255)
         )
-        screen.blit(page_text, (self.panel_rect.centerx - 20, self.panel_rect.bottom + 20))
+        screen.blit(page_text, (panel.centerx - 20, panel.bottom - 30))
         
         # Buttons
         self._draw_button(screen, self.prev_button, "<")
@@ -446,4 +461,3 @@ class CoolerState(GameState):
 
         text = self.button_font.render(label, True, (255,255,255))
         screen.blit(text, text.get_rect(center=rect.center))
-
