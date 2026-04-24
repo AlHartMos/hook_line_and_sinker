@@ -143,7 +143,7 @@ class CoolerState(GameState):
 
             # return to previous DialogueState
             dialogue_state = self.game.state
-    
+
             dialogue_state.node = trade["resume_node"]
             dialogue_state.line_index = 0
             return
@@ -200,37 +200,34 @@ class CoolerState(GameState):
     # ---------- INPUT HANDLING ----------
 
     def handle_event(self, event):
-        """
-        Handles all mouse input for:
-        - grid navigation
-        - trade selection
-        - detail actions
-        """
-        # SCROLLING MECHANIC
+        if event.type == pygame.QUIT:
+            self.game.running = False
+            return
+
+        # --- SCROLLING ---
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4:  # scroll up
                 self.scroll_offset = max(0, self.scroll_offset - 40)
+                return
             elif event.button == 5:  # scroll down
                 self.scroll_offset = min(self.max_scroll, self.scroll_offset + 40)
-                if event.type == pygame.QUIT:
-                    self.game.running = False
-                    return
+                return
 
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if not self.panel_rect.collidepoint(event.pos):
-                        self.game.pop_state()
-                        return
+        # --- ONLY handle left click from here on ---
+        if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
+            return
 
-                if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
-                    return
+        # --- CLICK OUTSIDE PANEL ---
+        if not self.panel_rect.collidepoint(event.pos):
+            self.game.pop_state()
+            return
 
-        # TRADE MODE
+        # ---------- TRADE MODE ----------
         if self.mode == "trade":
             required = self.trade_request.get("required_fish", 0)
 
             for idx, rect in enumerate(self.grid_rects):
                 if rect.collidepoint(event.pos):
-                    # Toggle selection, but cap at required amount
                     if idx in self.selected_indices:
                         self.selected_indices.remove(idx)
                     else:
@@ -238,17 +235,15 @@ class CoolerState(GameState):
                             self.selected_indices.add(idx)
                     return
 
-            # Confirm trade
             if self.confirm_button_rect.collidepoint(event.pos):
                 self._confirm_trade()
                 return
 
-            # Cancel trade
             if self.cancel_button_rect.collidepoint(event.pos):
                 self.game.pop_state()
                 return
 
-        # NORMAL GRID MODE
+        # ---------- GRID MODE ----------
         elif self.mode == "grid":
             if self.return_to_free_button_rect.collidepoint(event.pos):
                 self.game.pop_state()
@@ -260,7 +255,7 @@ class CoolerState(GameState):
                     self.mode = "detail"
                     return
 
-        # DETAIL MODE
+        # ---------- DETAIL MODE ----------
         elif self.mode == "detail":
             if self.eat_button_rect.collidepoint(event.pos):
                 self._eat_selected()
@@ -413,12 +408,13 @@ class CoolerState(GameState):
             self._draw_button(screen, confirm_rect, "Confirm", color)
             self._draw_button(screen, cancel_rect, "Cancel")
 
-            # Scrolling max
-            rows = (len(self.game.save_data.cooler) + self.grid_cols - 1) // self.grid_cols
-            total_height = rows * (self.slot_size + 100)
+        # Scrolling max
+        rows = (len(self.game.save_data.cooler) + self.grid_cols - 1) // self.grid_cols
+        total_height = rows * (self.slot_size + 100)
 
-            visible_height = panel.height - 80
-            self.max_scroll = max(0, total_height - visible_height)
+        visible_height = panel.height - 80
+        self.max_scroll = max(0, total_height - visible_height)
+
 
     def _draw_detail(self, screen):
         """

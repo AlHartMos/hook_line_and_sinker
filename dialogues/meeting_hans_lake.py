@@ -90,6 +90,7 @@ meeting_hans_lake = {
             hans,
             "Hans.",
             kind="npc",
+            associated_flag="introduced_hans",
             next_node="questions"
         )
     ],
