@@ -1,8 +1,6 @@
 import pygame
 
 from states.base_state import GameState
-from states.cooler_state import CoolerState
-
 
 class DialogueState(GameState):
     # This state handles any conversation in the game.
@@ -181,6 +179,8 @@ class DialogueState(GameState):
 
     # Handles the player clicking a choice button.
     def choose_choice(self, choice_index):
+        from states.cooler_state import CoolerState
+        
         choices = self.current_choices()
         if not choices:
             self.game.pop_state()

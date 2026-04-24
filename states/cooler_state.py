@@ -1,7 +1,5 @@
 import pygame
 from states.base_state import GameState
-from states.dialogue_state import DialogueState
-
 
 class CoolerState(GameState):
     def __init__(self, game, mode="grid", trade_request=None):
@@ -105,6 +103,7 @@ class CoolerState(GameState):
     # ---------- TRADE LOGIC ----------
 
     def _confirm_trade(self):
+        from states.dialogue_state import DialogueState
         """
         Handles trade confirmation for BOTH:
         - Standard trades (Bertha)
@@ -117,7 +116,7 @@ class CoolerState(GameState):
             • cumulative progress (Felix)
             - Returns to appropriate dialogue node
             """
-
+        
         trade = self.trade_request
 
         required = trade.get("required_fish", 0)
@@ -319,48 +318,48 @@ class CoolerState(GameState):
 
     def _draw_grid(self, screen):
         panel = pygame.Rect(60, 80, 1160, 560)
-    
+
         pygame.draw.rect(screen, (18, 18, 24), panel, border_radius=18)
         pygame.draw.rect(screen, (255, 255, 255), panel, 2, border_radius=18)
-    
+
         cap = self.game.save_data._cooler_capacity()
         count = len(self.game.save_data.cooler)
-    
+
         # --- Slightly repositioned capacity text (less cramped) ---
         text = self.small_font.render(f"{count} / {cap}", True, (255,255,255))
         screen.blit(text, (panel.right - 120, panel.y + 10))
-    
+
         self.grid_rects = []
-    
+
         for i, entry in enumerate(self.game.save_data.cooler):
             x = panel.x + 24 + (i % 4) * (self.slot_size + self.slot_gap)
             y = panel.y + 80 + (i // 4) * (self.slot_size + 60)
-    
+
             rect = pygame.Rect(x, y, self.slot_size, self.slot_size)
             self.grid_rects.append(rect)
-    
+
             pygame.draw.rect(screen, (45,45,60), rect, border_radius=12)
-    
+
             catchable, mutation = self._get_entry_data(i)
-    
+
             image = catchable.image_for_mutation(mutation)
             if image:
                 img = self.game.load_image(image)
                 screen.blit(pygame.transform.scale(img, (110,110)), (x+5,y+5))
-    
+
             name = self.small_font.render(catchable.name, True, (255,255,255))
             screen.blit(name, (x, y+125))
-    
+
             if self.mode == "trade" and i in self.selected_indices:
                 pygame.draw.rect(screen, (255,215,0), rect, 3)
-    
+
         # ---------- TRADE UI (SPACING FIXED) ----------
         if self.mode == "trade":
             required = self.trade_request.get("required_fish", 0)
             selected = len(self.selected_indices)
-    
+
             header_y = panel.y + 20
-    
+
             # Main counter (larger + centered)
             main_text = self.body_font.render(
                 f"{selected} / {required}",
@@ -369,12 +368,12 @@ class CoolerState(GameState):
             )
             main_rect = main_text.get_rect(center=(panel.centerx, header_y + 10))
             screen.blit(main_text, main_rect)
-    
+
             # Felix cumulative progress (smaller + below)
             if "total_required" in self.trade_request:
                 total_required = self.trade_request["total_required"]
                 given = self.game.save_data.felix_fish_given
-    
+
                 progress_text = self.small_font.render(
                     f"Total given: {given} / {total_required}",
                     True,
@@ -382,15 +381,15 @@ class CoolerState(GameState):
                 )
                 progress_rect = progress_text.get_rect(center=(panel.centerx, header_y + 40))
                 screen.blit(progress_text, progress_rect)
-    
+
             # Slightly lowered buttons for breathing room
             button_offset = 20
-    
+
             color = (80,80,80) if selected < required else (40,40,60)
-    
+
             confirm_rect = self.confirm_button_rect.move(0, button_offset)
             cancel_rect = self.cancel_button_rect.move(0, button_offset)
-    
+
             self._draw_button(screen, confirm_rect, "Confirm", color)
             self._draw_button(screen, cancel_rect, "Cancel")
 
