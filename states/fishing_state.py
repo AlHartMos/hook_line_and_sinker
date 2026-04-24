@@ -300,6 +300,10 @@ class FishingState(GameState):
         if event.type == pygame.QUIT:
             self.game.running = False
             return
+        
+        # Get positions of buttons
+        if self.phase == "choice":
+            self._update_button_positions()
 
         # Ignore input during the reveal phase
         if self.phase != "choice":
@@ -431,9 +435,6 @@ class FishingState(GameState):
         pygame.draw.rect(screen, (40, 40, 60), rect, border_radius=12)
         pygame.draw.rect(screen, (255, 255, 255), rect, width=2, border_radius=12)
 
-        surf = self.button_font.render(label, True, (255, 255, 255))
-        screen.blit(surf, surf.get_rect(center=rect.center))
-
     def _safe_stat_value(self, values, mutation):
         # Returns the stat value for the current mutation level,
         # while safely clamping the index into the valid range.
@@ -468,3 +469,30 @@ class FishingState(GameState):
         # Eat the caught fish immediately and return to FreeState.
         self._apply_eat_rewards()
         self.game.pop_state()
+
+    def _update_button_positions(self):
+        screen_w, screen_h = self.game.screen.get_size()
+
+        panel = pygame.Rect(160, 120, screen_w - 320, screen_h - 240)
+        center_x = panel.centerx
+
+        button_y = panel.bottom - 100
+        spacing = 220
+
+        buttons = []
+
+        # Release
+        buttons.append(self.release_button)
+
+        # Eat
+        if self.catch is not None and (self.catch.isFish or self.catch.name == "Lake Weed Cluster"):
+            buttons.append(self.eat_button)
+
+        # Cooler
+        buttons.append(self.cooler_button)
+
+        total_width = spacing * (len(buttons) - 1)
+        start_x = center_x - total_width // 2
+
+        for i, rect in enumerate(buttons):
+            rect.center = (start_x + i * spacing, button_y)
