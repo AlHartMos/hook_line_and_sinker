@@ -228,26 +228,26 @@ class FreeState(GameState):
     def update(self, dt):
         # Trigger valley intro when reaching 85 energy (only once)
 
-        # Only show overlay when in valley (or similar cases)
-        if (
-            "valley_paths_unlocked" in self.game.save_data.flags
-            and not isinstance(self.game.state, DialogueState)
-        ):
-            if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
-                self.game.push_state(ButtonOverlayState(self.game))        
-        # Play pending dialogue
-        if getattr(self.game.save_data, "pending_dialogue", None):
-            data = self.game.save_data.pending_dialogue
-            self.game.save_data.pending_dialogue = None
+        # Then handle the one-time arrival conversation for the location.
+        if not self.arrival_checked:
+            self.arrival_checked = True
+            self._maybe_start_arrival_conversation()
 
-            self.game.push_state(
-                DialogueState(
-                    self.game,
-                    data["conversation"],
-                    data["start_node"]
-                )
-            )
-            return
+        from dialogues.location_starters.valley_starter import valley_intro_after_fish
+        if (
+            self.location is not None
+            and self.location.id == 2
+            and self.game.save_data.energy >= 85
+            and "valley_intro_played" not in self.game.save_data.flags
+        ):
+            self.game.save_data.flags.add("valley_intro_played")
+
+            self.game.save_data.pending_dialogue = {
+                "conversation": valley_intro_after_fish,
+                "start_node": "intro"
+            }
+
+            return  # IMPORTANT: stop further updates this frame
         
         # If dialogue just finished and we have a delayed popup
         if (
@@ -279,27 +279,28 @@ class FreeState(GameState):
                 )
             )
             return
-
-        # Then handle the one-time arrival conversation for the location.
-        if not self.arrival_checked:
-            self.arrival_checked = True
-            self._maybe_start_arrival_conversation()
-
-        from dialogues.location_starters.valley_starter import valley_intro_after_fish
+        
+        # Only show overlay when in valley (or similar cases)
         if (
-            self.location is not None
-            and self.location.id == 2
-            and self.game.save_data.energy >= 85
-            and "valley_intro_played" not in self.game.save_data.flags
+            "valley_paths_unlocked" in self.game.save_data.flags
+            and not isinstance(self.game.state, DialogueState)
         ):
-            self.game.save_data.flags.add("valley_intro_played")
+            if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
+                self.game.push_state(ButtonOverlayState(self.game))        
+        # Play pending dialogue
+        if getattr(self.game.save_data, "pending_dialogue", None):
+            data = self.game.save_data.pending_dialogue
+            self.game.save_data.pending_dialogue = None
 
-            self.game.save_data.pending_dialogue = {
-                "conversation": valley_intro_after_fish,
-                "start_node": "intro"
-            }
+            self.game.push_state(
+                DialogueState(
+                    self.game,
+                    data["conversation"],
+                    data["start_node"]
+                )
+            )
+            return
 
-            return  # IMPORTANT: stop further updates this frame
 
 
     # This draws the current location and the permanent world buttons.
