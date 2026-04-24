@@ -375,9 +375,9 @@ class FishingState(GameState):
         center_x = panel.centerx
 
         # --- IMAGE (large + centered) ---
-        image_size = 180
-        image_y = panel.y + 40
-
+        image_size = 360
+        image_y = panel.y + 20   # move image slightly up
+        
         if image:
             img_rect = pygame.Rect(
                 center_x - image_size // 2,
@@ -385,12 +385,12 @@ class FishingState(GameState):
                 image_size,
                 image_size
             )
-
+        
             scaled = pygame.transform.smoothscale(image, (image_size, image_size))
             pygame.draw.rect(screen, (240, 240, 240), img_rect, 2, border_radius=10)
             screen.blit(scaled, img_rect.topleft)
-
-            text_y = img_rect.bottom + 30
+        
+            text_y = img_rect.bottom + 20  # reduce spacing slightly        
         else:
             text_y = panel.y + 40
 
