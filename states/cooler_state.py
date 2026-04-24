@@ -203,6 +203,11 @@ class CoolerState(GameState):
         if event.type == pygame.QUIT:
             self.game.running = False
             return
+        
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if not self.panel_rect.collidepoint(event.pos):
+                self.game.pop_state()
+                return
 
         if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
             return
