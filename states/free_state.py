@@ -247,6 +247,43 @@ class FreeState(GameState):
 
             return  # IMPORTANT: stop further updates this frame
         
+        sd = self.game.save_data
+
+        # --- ENERGY 0 → GAME OVER ---
+        if sd.energy <= 0 and "game_over_energy" not in sd.flags:
+            sd.flags.add("game_over_energy")
+
+            sd.pending_popup = {
+                "title": "Exhaustion",
+                "message": "You have no energy left.",
+                "end_game": True
+            }
+            return
+
+
+        # --- MUTATION 25 ---
+        if sd.mutation_level >= 25 and "mutation_25_popup" not in sd.flags:
+            sd.flags.add("mutation_25_popup")
+
+            sd.pending_popup = {
+                "title": "Something's happening...",
+                "message": "You feel something changing inside you.",
+                "end_game": False
+            }
+            return
+
+
+        # --- MUTATION 100 → GAME OVER ---
+        if sd.mutation_level >= 100 and "mutation_100_popup" not in sd.flags:
+            sd.flags.add("mutation_100_popup")
+
+            sd.pending_popup = {
+                "title": "Transformation",
+                "message": "You are no longer human.",
+                "end_game": True
+            }
+            return
+        
         # --- overlay add ---
         valley_done = (
             "asked_bertha_treasure" in self.game.save_data.flags and
