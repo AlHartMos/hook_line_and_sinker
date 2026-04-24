@@ -265,23 +265,7 @@ class FreeState(GameState):
                 )
             )
             return
-        
-        from dialogues.location_starters.valley_starter import valley_intro_after_fish
-        if (
-            self.location is not None
-            and self.location.id == 2
-            and self.game.save_data.energy >= 85
-            and "valley_intro_played" not in self.game.save_data.flags
-        ):
-            self.game.save_data.flags.add("valley_intro_played")
-
-            self.game.save_data.pending_dialogue = {
-                "conversation": valley_intro_after_fish,
-                "start_node": "intro"
-            }
-
-            return  # IMPORTANT: stop further updates this frame
-        
+                
         # If another state requested a system popup, show it now.
         if self.game.save_data.pending_popup is not None:
             popup = self.game.save_data.pending_popup
@@ -300,6 +284,23 @@ class FreeState(GameState):
         if not self.arrival_checked:
             self.arrival_checked = True
             self._maybe_start_arrival_conversation()
+
+        from dialogues.location_starters.valley_starter import valley_intro_after_fish
+        if (
+            self.location is not None
+            and self.location.id == 2
+            and self.game.save_data.energy >= 85
+            and "valley_intro_played" not in self.game.save_data.flags
+        ):
+            self.game.save_data.flags.add("valley_intro_played")
+
+            self.game.save_data.pending_dialogue = {
+                "conversation": valley_intro_after_fish,
+                "start_node": "intro"
+            }
+
+            return  # IMPORTANT: stop further updates this frame
+
 
     # This draws the current location and the permanent world buttons.
     # The upper-left corner is left open so the overlay button can live there.
