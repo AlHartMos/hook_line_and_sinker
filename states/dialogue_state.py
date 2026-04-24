@@ -180,7 +180,7 @@ class DialogueState(GameState):
     # Handles the player clicking a choice button.
     def choose_choice(self, choice_index):
         from states.cooler_state import CoolerState
-        
+
         choices = self.current_choices()
         if not choices:
             self.game.pop_state()
@@ -261,7 +261,11 @@ class DialogueState(GameState):
 
     # Draws either normal dialogue or the current choice screen.
     def draw(self, screen):
-        screen.fill((20, 24, 34))
+        # Draw underlying state (FreeState) first
+        if len(self.game.state_stack) >= 2:
+            self.game.state_stack[-2].draw(screen)
+        else:
+            screen.fill((20, 24, 34))
 
         if self.is_choice_node():
             self.draw_choice_screen(screen)
