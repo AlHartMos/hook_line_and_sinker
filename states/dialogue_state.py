@@ -306,6 +306,9 @@ class DialogueState(GameState):
         text_x = 70 + 24
         max_width = screen_w - 140 - 60
 
+        portrait = self.get_portrait(entry)
+        show_name = self.get_display_name(entry)
+
         # Adjust for portrait
         if getattr(entry, "kind", "npc") == "npc" and portrait is not None:
             text_x = portrait_rect.right + 30
@@ -335,9 +338,6 @@ class DialogueState(GameState):
 
         pygame.draw.rect(screen, (15, 15, 20), box, border_radius=18)
         pygame.draw.rect(screen, (240, 240, 240), box, width=3, border_radius=18)
-
-        portrait = self.get_portrait(entry)
-        show_name = self.get_display_name(entry)
 
         text_x = box.x + 24
         text_top = box.y + padding_top + 10
