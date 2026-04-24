@@ -227,12 +227,26 @@ class FreeState(GameState):
     # arrival conversation that should be shown.
     def update(self, dt):
         # Only show overlay when in valley (or similar cases)
-        if "valley_paths_unlocked" in self.game.save_data.flags:
-        
-            # Check if overlay is already present
+        if (
+            "valley_paths_unlocked" in self.game.save_data.flags
+            and not isinstance(self.game.state, DialogueState)
+        ):
             if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
-                self.game.push_state(ButtonOverlayState(self.game))
+                self.game.push_state(ButtonOverlayState(self.game))        
+        # Play pending dialogue
+        if getattr(self.game.save_data, "pending_dialogue", None):
+            data = self.game.save_data.pending_dialogue
+            self.game.save_data.pending_dialogue = None
 
+            self.game.push_state(
+                DialogueState(
+                    self.game,
+                    data["conversation"],
+                    data["start_node"]
+                )
+            )
+            return
+        
         # If another state requested a system popup, show it now.
         if self.game.save_data.pending_popup is not None:
             popup = self.game.save_data.pending_popup
@@ -243,19 +257,6 @@ class FreeState(GameState):
                     self.game,
                     title=popup["title"],
                     message=popup["message"]
-                )
-            )
-            return
-        
-        if getattr(self.game.save_data, "pending_dialogue", None):
-            data = self.game.save_data.pending_dialogue
-            self.game.save_data.pending_dialogue = None
-
-            self.game.push_state(
-                DialogueState(
-                    self.game,
-                    data["conversation"],
-                    data["start_node"]
                 )
             )
             return
