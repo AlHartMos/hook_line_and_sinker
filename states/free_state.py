@@ -226,6 +226,23 @@ class FreeState(GameState):
     # The first time this runs after entering a location, it checks for any
     # arrival conversation that should be shown.
     def update(self, dt):
+        # Trigger valley intro when reaching 85 energy (only once)
+        from dialogues.location_starters.valley_starter import valley_intro_after_fish
+        if (
+            self.location is not None
+            and self.location.id == 2
+            and self.game.save_data.energy >= 85
+            and "valley_intro_played" not in self.game.save_data.flags
+        ):
+            self.game.save_data.flags.add("valley_intro_played")
+
+            self.game.save_data.pending_dialogue = {
+                "conversation": valley_intro_after_fish,
+                "start_node": "intro"
+            }
+
+            return  # IMPORTANT: stop further updates this frame
+
         # Only show overlay when in valley (or similar cases)
         if (
             "valley_paths_unlocked" in self.game.save_data.flags
@@ -325,11 +342,6 @@ class FreeState(GameState):
         # Only draw the move-on button if the unlock flag is present.
         if self.can_move_on():
             self._draw_button(screen, self.next_location_button_rect, "Move on")
-
-        # Small hint text at the bottom center.
-        hint_text = self.small_font.render("Use the buttons to fish or continue.", True, (235, 235, 235))
-        hint_rect = hint_text.get_rect(center=(screen_w // 2, screen_h - 24))
-        screen.blit(hint_text, hint_rect)
 
     # This draws a rounded button with centered text.
     # It keeps the free-state UI consistent and avoids repeating draw code.

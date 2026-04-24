@@ -60,6 +60,8 @@ class ValleyMenuState(GameState):
                         DialogueState(self.game, conversation, start_node)
                     )
                     return
+            self.game.pop_state()
+        
 
     def _get_conversation(self, key):
         # Map keys to actual dialogue dictionaries

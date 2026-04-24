@@ -3,7 +3,6 @@ import numpy as np
 
 from states.base_state import GameState
 from fishes import trash, minnow, perch, pike, catfish
-from dialogues.location_starters.valley_starter import valley_intro_after_fish
 
 
 class FishingState(GameState):
@@ -52,7 +51,7 @@ class FishingState(GameState):
         self.catch_image = self._load_catch_image()
 
         # Fishing costs energy immediately when the action begins.
-        self.game.save_data.energy = max(0, self.game.save_data.energy - 5)
+        self.game.save_data.energy = max(0, self.game.save_data.energy - 2)
 
         # Progression rules run after the catch exists.
         # This keeps the tutorial logic tied to the actual result of fishing.
@@ -132,8 +131,6 @@ class FishingState(GameState):
             self._handle_tutorial_progression()
         elif self.location.id == 1:
              self._handle_lake_progression()
-        elif self.location.id == 2:
-            self._handle_valley_progression()
 
     def _handle_tutorial_progression(self):
         # Tutorial progression only happens when the player catches trash.
@@ -228,23 +225,6 @@ class FishingState(GameState):
             self.game.save_data.lake_third_fish_popup_shown = True
             # This is the progression flag FreeState checks to show the next-location button.
             self.game.save_data.flags.add("three_fish_caught_lake")
-
-    def _handle_valley_progression(self):
-        # Only trigger on first fish caught
-        if self.catch.isTrash:
-           return
-
-        if "valley_first_fish" not in self.game.save_data.flags:
-            self.game.save_data.flags.add("valley_first_fish")
-
-            # Queue dialogue
-            self.game.save_data.pending_dialogue = {
-                "conversation": valley_intro_after_fish,
-                "start_node": "intro"
-            }
-
-            # Enable overlay button functionality
-            self.game.save_data.flags.add("valley_paths_unlocked")
 
 
     # ---------- IMAGE HANDLING ----------

@@ -201,6 +201,8 @@ class DialogueState(GameState):
             # Attach conversation reference for return
             trade_request["conversation"] = self.conversation
 
+            self.game.pop_state()  # exit dialogue
+
             self.game.push_state(
                 CoolerState(
                     self.game,
@@ -286,7 +288,47 @@ class DialogueState(GameState):
             return
 
         screen_w, screen_h = screen.get_size()
-        box = pygame.Rect(70, screen_h - 220, screen_w - 140, 160)
+        choices = self.current_choices()
+
+        button_h = 38
+        gap = 10
+        padding_top = 70
+        padding_bottom = 30
+
+        panel_height = (
+            padding_top +
+            len(choices) * button_h +
+            (len(choices) - 1) * gap +
+            padding_bottom
+        )
+
+        screen_w, screen_h = screen.get_size()
+
+        # --- text width ---
+        text_x = 70 + 24
+        max_width = screen_w - 140 - 60
+
+        # --- wrap text ---
+        lines = self.wrap_text(entry.text, self.body_font, max_width)
+
+        line_height = 30
+        text_height = len(lines) * line_height
+
+        # --- header space (name / thoughts) ---
+        header_height = 40
+
+        # --- padding ---
+        padding_top = 20
+        padding_bottom = 40
+
+        box_height = header_height + text_height + padding_top + padding_bottom
+
+        box = pygame.Rect(
+            70,
+            screen_h - box_height - 40,
+            screen_w - 140,
+            box_height
+        )
 
         pygame.draw.rect(screen, (15, 15, 20), box, border_radius=18)
         pygame.draw.rect(screen, (240, 240, 240), box, width=3, border_radius=18)
@@ -295,17 +337,17 @@ class DialogueState(GameState):
         show_name = self.get_display_name(entry)
 
         text_x = box.x + 24
-        text_top = box.y + 22
+        text_top = box.y + padding_top + 10
 
         if getattr(entry, "kind", "npc") == "npc" and portrait is not None:
-            portrait_size = 120
-            portrait_rect = pygame.Rect(box.x + 20, box.y - 140, portrait_size, portrait_size)
+            portrait_size = 200
+            portrait_rect = pygame.Rect(box.x + 20, box.y - 180, portrait_size, portrait_size)
 
             scaled = pygame.transform.smoothscale(portrait, (portrait_size, portrait_size))
             pygame.draw.rect(screen, (245, 245, 245), portrait_rect, width=3, border_radius=10)
             screen.blit(scaled, portrait_rect.topleft)
 
-            text_x = portrait_rect.right + 20
+            text_x = portrait_rect.right + 30
             text_top = box.y + 22
 
         if getattr(entry, "kind", "npc") == "npc" and show_name:
@@ -318,7 +360,6 @@ class DialogueState(GameState):
             screen.blit(tag, (text_x, text_top))
             text_top += 28
 
-        lines = self.wrap_text(entry.text, self.body_font, box.width - (text_x - box.x) - 30)
         for i, line in enumerate(lines):
             surf = self.body_font.render(line, True, (230, 230, 230))
             screen.blit(surf, (text_x, text_top + i * 30))
