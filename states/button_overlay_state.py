@@ -64,29 +64,23 @@ class ButtonOverlayState(GameState):
             self.game.state_stack[-2].update(dt)
 
     def draw(self, screen):
-        # First draw the underlying state
-        if len(self.game.state_stack) >= 2:
-            # Find the first NON-overlay state below
-            for state in reversed(self.game.state_stack[:-1]):
-                if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
-                    state.draw(screen)
-                    break
+        from states.free_state import FreeState
+        # --- ALWAYS draw FreeState if it exists ---
+        base_drawn = False
 
-        # Change label based on whether valley is unlocked
-        if "valley_paths_unlocked" in self.game.save_data.flags:
-            text = "Explore Village"
-        else:
-            text = "..."
+        for state in self.game.state_stack:
+            if isinstance(state, FreeState):
+                state.draw(screen)
+                base_drawn = True
+                break
 
-        # Draw button background
-        pygame.draw.rect(screen, (35, 35, 50), self.button_rect, border_radius=10)
+        # fallback if somehow FreeState isn't present
+        if not base_drawn:
+            screen.fill((20, 20, 30))
 
-        # Draw border
-        pygame.draw.rect(screen, (255, 255, 255), self.button_rect, width=2, border_radius=10)
+        # --- DRAW THE OVERLAY BUTTON ---
+        pygame.draw.rect(screen, (40, 40, 60), self.button_rect, border_radius=12)
+        pygame.draw.rect(screen, (255, 255, 255), self.button_rect, 2, border_radius=12)
 
-        # Render text
-        text_surf = self.font.render(text, True, (255, 255, 255))
-        text_rect = text_surf.get_rect(center=self.button_rect.center)
-
-        # Draw text
-        screen.blit(text_surf, text_rect)
+        text = self.font.render("Explore", True, (255, 255, 255))
+        screen.blit(text, text.get_rect(center=self.button_rect.center))

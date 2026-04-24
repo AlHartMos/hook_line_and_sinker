@@ -161,7 +161,7 @@ class FreeState(GameState):
                     self.game.save_data.energy = 10
 
                 # Feedback popup
-                self.game.save_data.pending_popup = {
+                self.game.save_data.pending_popup_after_dialogue = {
                     "title": "Exhaustion",
                     "message": "The journey drained your energy."
                 }
@@ -243,6 +243,23 @@ class FreeState(GameState):
                     self.game,
                     data["conversation"],
                     data["start_node"]
+                )
+            )
+            return
+        
+        # If dialogue just finished and we have a delayed popup
+        if (
+            not any(isinstance(s, DialogueState) for s in self.game.state_stack)
+            and getattr(self.game.save_data, "pending_popup_after_dialogue", None)
+        ):
+            popup = self.game.save_data.pending_popup_after_dialogue
+            self.game.save_data.pending_popup_after_dialogue = None
+        
+            self.game.push_state(
+                PopupState(
+                    self.game,
+                    title=popup["title"],
+                    message=popup["message"]
                 )
             )
             return
