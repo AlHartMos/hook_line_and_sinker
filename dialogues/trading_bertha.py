@@ -111,7 +111,7 @@ bertha_trading["_trade"] = {
         "required_fish": 3,
         "purchase_flag": "purchased_lighter",
         "fail_node": "not_enough",
-        "resume_node": "lighter_success"
+        "success_node": "lighter_success"
     },
 
     "trade_cooler": {
@@ -119,7 +119,7 @@ bertha_trading["_trade"] = {
         "required_fish": 3,
         "purchase_flag": "purchased_extra_cooler",
         "fail_node": "not_enough",
-        "resume_node": "cooler_success"
+        "success_node": "cooler_success"
     },
 
     "trade_salt": {
@@ -127,6 +127,6 @@ bertha_trading["_trade"] = {
         "required_fish": 3,
         "purchase_flag": "purchased_salt",
         "fail_node": "not_enough",
-        "resume_node": "salt_success"
+        "success_node": "salt_success"
     }
 }
