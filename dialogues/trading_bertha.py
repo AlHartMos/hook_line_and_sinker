@@ -23,7 +23,6 @@ bertha_trading = {
             "Purchase a Lighter for 3 fish",
             kind="choice",
             next_node="trade_lighter",
-            associated_flag="purchased_lighter"
         ),
 
         # Cooler
@@ -32,7 +31,6 @@ bertha_trading = {
             "Purchase a Cooler for 3 fish",
             kind="choice",
             next_node="trade_cooler",
-            associated_flag="purchased_extra_cooler"
         ),
 
         # Salt
@@ -41,7 +39,6 @@ bertha_trading = {
             "Purchase Salt and Spice for 3 fish",
             kind="choice",
             next_node="trade_salt",
-            associated_flag="purchased_salt"
         ),
 
         # Exit
