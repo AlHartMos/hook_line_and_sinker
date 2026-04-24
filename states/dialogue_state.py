@@ -203,8 +203,6 @@ class DialogueState(GameState):
             # Attach conversation reference for return
             trade_request["conversation"] = self.conversation
 
-            self.game.pop_state()  # exit dialogue
-
             self.game.push_state(
                 CoolerState(
                     self.game,
@@ -308,6 +306,11 @@ class DialogueState(GameState):
         text_x = 70 + 24
         max_width = screen_w - 140 - 60
 
+        # Adjust for portrait
+        if getattr(entry, "kind", "npc") == "npc" and portrait is not None:
+            text_x = portrait_rect.right + 30
+            max_width = box.right - text_x - 20
+
         # --- wrap text ---
         lines = self.wrap_text(entry.text, self.body_font, max_width)
 
@@ -370,7 +373,26 @@ class DialogueState(GameState):
     # Draws a choice screen for the current node.
     def draw_choice_screen(self, screen):
         screen_w, screen_h = screen.get_size()
-        box = pygame.Rect(70, screen_h - 260, screen_w - 140, 200)
+        choices = self.current_choices()
+
+        button_h = 38
+        gap = 10
+        padding_top = 70
+        padding_bottom = 30
+
+        panel_height = (
+            padding_top +
+            len(choices) * button_h +
+            (len(choices) - 1) * gap +
+            padding_bottom
+        )
+
+        box = pygame.Rect(
+            70,
+            screen_h - panel_height - 40,
+            screen_w - 140,
+            panel_height
+        )
 
         pygame.draw.rect(screen, (15, 15, 20), box, border_radius=18)
         pygame.draw.rect(screen, (240, 240, 240), box, width=3, border_radius=18)
