@@ -54,6 +54,10 @@ class CoolerState(GameState):
         # Cached background image
         self.background_cache = None
 
+        # Scrolling mechanic
+        self.scroll_offset = 0
+        self.max_scroll = 0
+
     def enter(self):
         """
         Called when the cooler state is opened.
@@ -134,15 +138,14 @@ class CoolerState(GameState):
 
         # --- STANDARD TRADE CHECK (Bertha) ---
         # Only enforce required_fish if NOT a cumulative trade
-        if total_required is None and selected_count < required:
-            self.game.pop_state()
-            self.game.push_state(
-                DialogueState(
-                    self.game,
-                    trade["conversation"],
-                    trade["fail_node"]
-                )
-            )
+        if selected_count < required:
+            self.game.pop_state()  # remove CoolerState
+
+            # return to previous DialogueState
+            dialogue_state = self.game.state
+    
+            dialogue_state.node = trade["resume_node"]
+            dialogue_state.line_index = 0
             return
 
         # --- REMOVE SELECTED FISH ---
@@ -203,17 +206,23 @@ class CoolerState(GameState):
         - trade selection
         - detail actions
         """
-        if event.type == pygame.QUIT:
-            self.game.running = False
-            return
-        
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if not self.panel_rect.collidepoint(event.pos):
-                self.game.pop_state()
-                return
+        # SCROLLING MECHANIC
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 4:  # scroll up
+                self.scroll_offset = max(0, self.scroll_offset - 40)
+            elif event.button == 5:  # scroll down
+                self.scroll_offset = min(self.max_scroll, self.scroll_offset + 40)
+                if event.type == pygame.QUIT:
+                    self.game.running = False
+                    return
 
-        if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
-            return
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if not self.panel_rect.collidepoint(event.pos):
+                        self.game.pop_state()
+                        return
+
+                if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
+                    return
 
         # TRADE MODE
         if self.mode == "trade":
@@ -341,7 +350,7 @@ class CoolerState(GameState):
 
         for i, entry in enumerate(self.game.save_data.cooler):
             x = panel.x + 24 + (i % 4) * (self.slot_size + self.slot_gap)
-            y = panel.y + 80 + (i // 4) * (self.slot_size + 100)
+            y = panel.y + 80 + (i // 4) * (self.slot_size + 100) - self.scroll_offset
 
             rect = pygame.Rect(x, y, self.slot_size, self.slot_size)
             self.grid_rects.append(rect)
@@ -403,6 +412,13 @@ class CoolerState(GameState):
 
             self._draw_button(screen, confirm_rect, "Confirm", color)
             self._draw_button(screen, cancel_rect, "Cancel")
+
+            # Scrolling max
+            rows = (len(self.game.save_data.cooler) + self.grid_cols - 1) // self.grid_cols
+            total_height = rows * (self.slot_size + 100)
+
+            visible_height = panel.height - 80
+            self.max_scroll = max(0, total_height - visible_height)
 
     def _draw_detail(self, screen):
         """
