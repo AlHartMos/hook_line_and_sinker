@@ -35,11 +35,10 @@ class FishingState(GameState):
         self.small_font = None
 
         # Choice buttons shown after the catch reveal.
-        # Eat is only shown if the catch is a fish.
-        center_x = 1280 // 2
-        self.eat_button     = pygame.Rect(center_x - 300, 560, 180, 54)
-        self.release_button = pygame.Rect(center_x - 90, 560, 180, 54)
-        self.cooler_button  = pygame.Rect(center_x + 120, 560, 180, 54)
+        # Eat is only shown if the catch is a fish or weeds.
+        self.eat_button     = pygame.Rect(0, 0, 200, 60)
+        self.release_button = pygame.Rect(0, 0, 200, 60)
+        self.cooler_button  = pygame.Rect(0, 0, 220, 60)
 
     def enter(self):
         # Called once when fishing starts.
@@ -188,6 +187,10 @@ class FishingState(GameState):
             self.game.save_data.lake_fish_caught == 1
             and not self.game.save_data.lake_first_fish_popup_shown
         ):
+            # Change fish to a level 0 mutant
+            self.catch_mutation = 0
+            self.catch_image = self._load_catch_image()
+
             self._queue_popup(
                 "Lake",
                 "Great! As you saw, you need to pick what you want to do with the fish you catch. Let's store them all in the cooler for now, but usually you could also eat it to restore energy or release it."
@@ -201,6 +204,10 @@ class FishingState(GameState):
                 "Lake",
                 "Well done, you began to get the gist of it! Now that we have a few fish, let’s check our cooler. To look into your cooler press Cooler"
             )
+            # Change fish to a level 0 mutant
+            self.catch_mutation = 0
+            self.catch_image = self._load_catch_image()
+
             self.game.save_data.lake_second_fish_popup_shown = True
         elif (
             self.game.save_data.lake_fish_caught == 3
@@ -360,35 +367,65 @@ class FishingState(GameState):
             screen.fill((25, 35, 50))
 
     def _draw_message_box(self, screen, title, body="", image=None):
-        box = pygame.Rect(120, 420, 1040, 230)
+        screen_w, screen_h = screen.get_size()
 
-        pygame.draw.rect(screen, (20, 20, 20), box, border_radius=16)
-        pygame.draw.rect(screen, (240, 240, 240), box, width=3, border_radius=16)
+        # --- MAIN PANEL ---
+        panel = pygame.Rect(160, 120, screen_w - 320, screen_h - 240)
 
-        image_size = 120 if image else 0
+        pygame.draw.rect(screen, (18, 18, 24), panel, border_radius=20)
+        pygame.draw.rect(screen, (255, 255, 255), panel, 2, border_radius=20)
+
+        center_x = panel.centerx
+
+        # --- IMAGE (large + centered) ---
+        image_size = 180
+        image_y = panel.y + 40
 
         if image:
-            image_box = pygame.Rect(
-                box.centerx - image_size // 2,
-                box.y + 16,
+            img_rect = pygame.Rect(
+                center_x - image_size // 2,
+                image_y,
                 image_size,
                 image_size
             )
 
             scaled = pygame.transform.smoothscale(image, (image_size, image_size))
-            pygame.draw.rect(screen, (245, 245, 245), image_box, width=3, border_radius=8)
-            screen.blit(scaled, image_box.topleft)
+            pygame.draw.rect(screen, (240, 240, 240), img_rect, 2, border_radius=10)
+            screen.blit(scaled, img_rect.topleft)
 
-            text_y = image_box.bottom + 10
+            text_y = img_rect.bottom + 30
         else:
-            text_y = box.y + 30
+            text_y = panel.y + 40
 
+        # --- TITLE (centered) ---
         title_surf = self.title_font.render(title, True, (255, 255, 255))
-        screen.blit(title_surf, (box.x + 28, text_y))
+        title_rect = title_surf.get_rect(center=(center_x, text_y))
+        screen.blit(title_surf, title_rect)
 
-        if body:
-            body_surf = self.body_font.render(body, True, (230, 230, 230))
-            screen.blit(body_surf, (box.x + 28, text_y + 44))
+        # --- BUTTONS (horizontal, centered) ---
+        button_y = panel.bottom - 100
+        spacing = 220
+
+        buttons = []
+
+        # Release (always)
+        buttons.append(("Release", self.release_button))
+
+        # Eat (only if fish or weeds)
+        if self.catch is not None and (self.catch.isFish or self.catch.name == "Lake Weed Cluster"):
+            buttons.append(("Eat", self.eat_button))
+
+        # Add to cooler
+        buttons.append(("Add to cooler", self.cooler_button))
+
+        # Center buttons
+        total_width = spacing * (len(buttons) - 1)
+        start_x = center_x - total_width // 2
+
+        if self.phase == "choice":
+            for i, (label, rect) in enumerate(buttons):
+                rect.center = (start_x + i * spacing, button_y)
+                self._draw_button(screen, rect, label)
 
     def _draw_button(self, screen, rect, label):
         pygame.draw.rect(screen, (40, 40, 60), rect, border_radius=12)
