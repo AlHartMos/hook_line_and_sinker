@@ -300,10 +300,6 @@ class FishingState(GameState):
         if event.type == pygame.QUIT:
             self.game.running = False
             return
-        
-        # Get positions of buttons
-        if self.phase == "choice":
-            self._update_button_positions()
 
         # Ignore input during the reveal phase
         if self.phase != "choice":
@@ -466,30 +462,3 @@ class FishingState(GameState):
         # Eat the caught fish immediately and return to FreeState.
         self._apply_eat_rewards()
         self.game.pop_state()
-
-    def _update_button_positions(self):
-        screen_w, screen_h = self.game.screen.get_size()
-
-        panel = pygame.Rect(160, 120, screen_w - 320, screen_h - 240)
-        center_x = panel.centerx
-
-        button_y = panel.bottom - 100
-
-        buttons = []
-        # Release
-        buttons.append(self.release_button)
-        # Eat
-        if self.catch is not None and (self.catch.consumable):
-            buttons.append(self.eat_button)
-        # Cooler
-        buttons.append(self.cooler_button)
-
-        # Dynamic spacing
-        gap = 40
-        total_width = sum(rect.width for rect in buttons) + gap * (len(buttons) - 1)
-        start_x = center_x - total_width // 2
-
-        current_x = start_x
-        for rect in buttons:
-            rect.center = (current_x + rect.width // 2, button_y)
-            current_x += rect.width + gap
