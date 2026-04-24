@@ -263,7 +263,7 @@ class FreeState(GameState):
                 self.game.push_state(ButtonOverlayState(self.game))
 
         # --- overlay remove ---
-        if valley_done:
+        if valley_done and any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
             self.game.state_stack = [
                 s for s in self.game.state_stack
                 if not isinstance(s, ButtonOverlayState)
