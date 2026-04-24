@@ -400,8 +400,8 @@ class FishingState(GameState):
         screen.blit(title_surf, title_rect)
 
         # --- BUTTONS (horizontal, centered) ---
-        button_y = panel.bottom - 100
-        spacing = 220
+        button_y = min(text_y + 80, panel.bottom - 60)
+        spacing = 260
 
         buttons = []
 

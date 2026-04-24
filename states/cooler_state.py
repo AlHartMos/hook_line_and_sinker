@@ -345,7 +345,7 @@ class CoolerState(GameState):
             image = catchable.image_for_mutation(mutation)
             if image:
                 img = self.game.load_image(image)
-                screen.blit(pygame.transform.scale(img, (110,110)), (x+5,y+5))
+                screen.blit(pygame.transform.scale(img, (220,220)), (x+5,y+5))
 
             name = self.small_font.render(catchable.name, True, (255,255,255))
             screen.blit(name, (x, y+125))
