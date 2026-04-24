@@ -31,10 +31,67 @@ class Catchable():
 
 
 # Defining the different catchable items
-minnow = Catchable("Minnow", True, ["assets/minnow_0.png", "assets/minnow_1.png", "assets/minnow_2.png", "assets/minnow_3.png", "assets/minnow_4.png"], [1, 1.5, 2, 3, 5], [0, 1, 2, 3, 4])
-perch = Catchable("Perch", True, ["assets/perch_0.png", "assets/perch_1.png", "assets/perch_2.png", "assets/perch_3.png", "assets/perch_4.png"], [3, 3.5, 5, 6, 8], [0, 1, 3, 5, 8])
-pike = Catchable("Pike", True, None, [3, 3.5, 5, 6, 8], [0, 1, 3, 5, 8])
-catfish = Catchable("Catfish", True, None, [7, 8, 10, 12, 15], [0, 2, 6, 10, 15])
+minnow = Catchable(
+    "Minnow", 
+    True, 
+    [
+        "assets/minnow_0.png", 
+        "assets/minnow_1.png", 
+        "assets/minnow_2.png", 
+        "assets/minnow_3.png", 
+        "assets/minnow_4.png"
+    ], 
+    [1, 1.5, 2, 3, 5], 
+    [0, 1, 2, 3, 4]
+ )
 
-weeds = Catchable("Lake Weed Cluster", False, "assets/Weed.png", [0.5], [0])
+perch = Catchable(
+    "Perch", 
+    True, 
+    [
+        "assets/perch_0.png", 
+        "assets/perch_1.png", 
+        "assets/perch_2.png", 
+        "assets/perch_3.png", 
+        "assets/perch_4.png"
+    ], 
+    [3, 3.5, 5, 6, 8], 
+    [0, 1, 3, 5, 8]
+)
+
+pike = Catchable(
+    "Pike", 
+    True, 
+    [
+        "assets/pike_0.png", 
+        "assets/pike_1.png", 
+        None, 
+        None, 
+        None
+    ], 
+    [3, 3.5, 5, 6, 8], 
+    [0, 1, 3, 5, 8]
+)
+
+catfish = Catchable(
+    "Catfish", 
+    True, 
+    [
+        None, 
+        None, 
+        None, 
+        None, 
+        None
+    ], 
+    [7, 8, 10, 12, 15], 
+    [0, 2, 6, 10, 15]
+)
+
+weeds = Catchable(
+    "Lake Weed Cluster", 
+    False, 
+    "assets/Weed.png", 
+    [0.5], 
+    [0]
+)
 
