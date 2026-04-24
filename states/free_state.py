@@ -226,9 +226,7 @@ class FreeState(GameState):
     # The first time this runs after entering a location, it checks for any
     # arrival conversation that should be shown.
     def update(self, dt):
-        # Trigger valley intro when reaching 85 energy (only once)
-
-        # Then handle the one-time arrival conversation for the location.
+        # Handle the one-time arrival conversation for the location.
         if not self.arrival_checked:
             self.arrival_checked = True
             self._maybe_start_arrival_conversation()
@@ -248,6 +246,28 @@ class FreeState(GameState):
             }
 
             return  # IMPORTANT: stop further updates this frame
+        
+        # --- overlay add ---
+        valley_done = (
+            "asked_bertha_treasure" in self.game.save_data.flags and
+            "meeting_hans_complete" in self.game.save_data.flags and
+            "felix_done" in self.game.save_data.flags
+        )
+        
+        if (
+            "valley_paths_unlocked" in self.game.save_data.flags
+            and not valley_done
+            and not isinstance(self.game.state, DialogueState)
+        ):
+            if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
+                self.game.push_state(ButtonOverlayState(self.game))
+
+        # --- overlay remove ---
+        if valley_done:
+            self.game.state_stack = [
+                s for s in self.game.state_stack
+                if not isinstance(s, ButtonOverlayState)
+            ]
         
         # If dialogue just finished and we have a delayed popup
         if (
@@ -280,28 +300,6 @@ class FreeState(GameState):
             )
             return
         
-        # Only show overlay when in valley (or similar cases)
-        if (
-            "valley_paths_unlocked" in self.game.save_data.flags
-            and not isinstance(self.game.state, DialogueState)
-        ):
-            if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
-                self.game.push_state(ButtonOverlayState(self.game))        
-        # Play pending dialogue
-        if getattr(self.game.save_data, "pending_dialogue", None):
-            data = self.game.save_data.pending_dialogue
-            self.game.save_data.pending_dialogue = None
-
-            self.game.push_state(
-                DialogueState(
-                    self.game,
-                    data["conversation"],
-                    data["start_node"]
-                )
-            )
-            return
-
-
 
     # This draws the current location and the permanent world buttons.
     # The upper-left corner is left open so the overlay button can live there.

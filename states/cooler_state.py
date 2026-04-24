@@ -215,9 +215,13 @@ class CoolerState(GameState):
                     if real_index in self.selected_indices:
                         self.selected_indices.remove(real_index)
                     else:
-                        if len(self.selected_indices) < required:
+                        # If cumulative trade (Felix), allow unlimited selection
+                        if self.trade_request.get("total_required") is not None:
                             self.selected_indices.add(real_index)
-                    return
+                        else:
+                            # Normal trade (Bertha)
+                            if len(self.selected_indices) < required:
+                                self.selected_indices.add(real_index)
             if self.confirm_button_rect.collidepoint(event.pos):
                 self._confirm_trade()
                 return
