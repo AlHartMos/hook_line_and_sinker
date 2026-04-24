@@ -374,3 +374,56 @@ class DialogueState(GameState):
         # --- HINT ---
         hint = self.small_font.render("Space / click to continue", True, (180, 180, 180))
         screen.blit(hint, (box.right - hint.get_width() - 18, box.bottom - 30))
+
+    def draw_choice_screen(self, screen):
+        screen_w, screen_h = screen.get_size()
+        choices = self.current_choices()
+
+        button_h = 38
+        gap = 10
+        padding_top = 70
+        padding_bottom = 30
+
+        panel_height = (
+            padding_top +
+            len(choices) * button_h +
+            (len(choices) - 1) * gap +
+            padding_bottom
+        )
+
+        box = pygame.Rect(
+            70,
+            screen_h - panel_height - 40,
+            screen_w - 140,
+            panel_height
+        )
+
+        pygame.draw.rect(screen, (15, 15, 20), box, border_radius=18)
+        pygame.draw.rect(screen, (240, 240, 240), box, width=3, border_radius=18)
+
+        prompt = self.title_font.render("Choose:", True, (255, 255, 255))
+        screen.blit(prompt, (box.x + 24, box.y + 18))
+
+        choices = self.current_choices()
+        self.choice_buttons = []
+
+        button_x = box.x + 24
+        button_y = box.y + 70
+        button_w = box.width - 48
+        button_h = 38
+        gap = 10
+
+        mouse_pos = pygame.mouse.get_pos()
+
+        for i, choice in enumerate(choices):
+            rect = pygame.Rect(button_x, button_y + i * (button_h + gap), button_w, button_h)
+            self.choice_buttons.append(rect)
+
+            hovered = rect.collidepoint(mouse_pos)
+            fill = (70, 70, 95) if hovered else (45, 45, 60)
+
+            pygame.draw.rect(screen, fill, rect, border_radius=10)
+            pygame.draw.rect(screen, (255, 255, 255), rect, width=2, border_radius=10)
+
+            text = self.choice_font.render(choice.text, True, (255, 255, 255))
+            screen.blit(text, (rect.x + 14, rect.y + 8))
