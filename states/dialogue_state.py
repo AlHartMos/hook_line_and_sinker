@@ -172,6 +172,8 @@ class DialogueState(GameState):
         if next_node:
             self.node = next_node
             self.line_index = 0
+            if not self.current_entries():
+                self.game.pop_state()
             return
 
         # If there is no next node, the conversation is over.
@@ -278,8 +280,6 @@ class DialogueState(GameState):
             self.draw_choice_screen(screen)
         else:
             self.draw_dialogue_screen(screen)
-
-        pygame.display.flip()
 
     # Draws NPC dialogue or player thoughts.
     def draw_dialogue_screen(self, screen):
