@@ -66,7 +66,11 @@ class ButtonOverlayState(GameState):
     def draw(self, screen):
         # First draw the underlying state
         if len(self.game.state_stack) >= 2:
-            self.game.state_stack[-2].draw(screen)
+            # Find the first NON-overlay state below
+            for state in reversed(self.game.state_stack[:-1]):
+                if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
+                    state.draw(screen)
+                    break
 
         # Change label based on whether valley is unlocked
         if "valley_paths_unlocked" in self.game.save_data.flags:

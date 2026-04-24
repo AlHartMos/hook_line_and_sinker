@@ -51,23 +51,24 @@ class FreeState(GameState):
             self.button_font = pygame.font.SysFont(None, 30)
             self.small_font = pygame.font.SysFont(None, 24)
 
-        # Push the overlay button once so it sits above FreeState.
-        # This makes the toggle visible while the player is exploring.
-        if not self._overlay_exists():
-            self.game.push_state(ButtonOverlayState(self.game))
-
     # This is a cleanup hook.
     # FreeState does not need special cleanup right now, but the method stays
     # here to keep the state interface consistent.
     def exit(self):
+        # Remove overlay if it exists
+        self.game.state_stack = [
+            s for s in self.game.state_stack
+            if not isinstance(s, ButtonOverlayState)
+        ]
         return super().exit()
-
+    
     # This checks whether the overlay is already in the stack.
     # It prevents FreeState from adding duplicate overlay states.
     def _overlay_exists(self):
         for state in self.game.state_stack:
             if isinstance(state, ButtonOverlayState):
                 return True
+            
         return False
 
     # This safely loads the background image for the current location.
@@ -227,7 +228,14 @@ class FreeState(GameState):
     # The first time this runs after entering a location, it checks for any
     # arrival conversation that should be shown.
     def update(self, dt):
-    # If another state requested a system popup, show it now.
+        # Only show overlay when in valley (or similar cases)
+        if "valley_paths_unlocked" in self.game.save_data.flags:
+        
+            # Check if overlay is already present
+            if not any(isinstance(s, ButtonOverlayState) for s in self.game.state_stack):
+                self.game.push_state(ButtonOverlayState(self.game))
+
+        # If another state requested a system popup, show it now.
         if self.game.save_data.pending_popup is not None:
             popup = self.game.save_data.pending_popup
             self.game.save_data.pending_popup = None
@@ -244,7 +252,7 @@ class FreeState(GameState):
         if getattr(self.game.save_data, "pending_dialogue", None):
             data = self.game.save_data.pending_dialogue
             self.game.save_data.pending_dialogue = None
-        
+
             self.game.push_state(
                 DialogueState(
                     self.game,
