@@ -30,6 +30,9 @@ class CoolerState(GameState):
         self.small_font = None
         self.button_font = None
 
+        # Panel size
+        self.panel_rect = pygame.Rect(60, 80, 1160, 560)
+
         # Grid layout settings
         self.grid_cols = 4
         self.slot_size = 240
@@ -322,7 +325,7 @@ class CoolerState(GameState):
         screen.blit(overlay, (0, 0))
 
     def _draw_grid(self, screen):
-        panel = pygame.Rect(60, 80, 1160, 560)
+        panel = self.panel_rect
 
         pygame.draw.rect(screen, (18, 18, 24), panel, border_radius=18)
         pygame.draw.rect(screen, (255, 255, 255), panel, 2, border_radius=18)
