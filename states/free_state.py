@@ -188,7 +188,7 @@ class FreeState(GameState):
         # --- TOO TIRED CHECK ---
         # Player must still have enough energy left AFTER travel
         if remaining_energy < MIN_ENERGY_AFTER_TRAVEL:
-            self.game.save_data.pending_popup = {
+            self.game.save_data.pending_popup_after_dialogue = {
                 "title": "Too Tired",
                 "message": "You are too exhausted to make the journey."
             }

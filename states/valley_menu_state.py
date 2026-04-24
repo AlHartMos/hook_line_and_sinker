@@ -11,6 +11,7 @@ from dialogues.trading_bertha import bertha_trading
 class ValleyMenuState(GameState):
     def __init__(self, game):
         super().__init__(game)
+        self.font = pygame.font.SysFont(None, 32)
 
         self.options = []
 
@@ -72,17 +73,41 @@ class ValleyMenuState(GameState):
         }[key]
 
     def draw(self, screen):
-        screen.fill((20, 20, 30))
+        from states.free_state import FreeState
+
+        # Draw FreeState in background
+        for state in self.game.state_stack:
+            if isinstance(state, FreeState):
+                state.draw(screen)
+                break
+            
+        # Dark overlay (so UI stands out)
+        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 160))
+        screen.blit(overlay, (0, 0))
 
         self.rects = []
 
+        screen_w, screen_h = screen.get_size()
+
+        button_width = 500
+        button_height = 60
+        spacing = 30
+
+        total_height = len(self.options) * button_height + (len(self.options) - 1) * spacing
+        start_y = (screen_h - total_height) // 2
+
         for i, (label, _) in enumerate(self.options):
-            rect = pygame.Rect(300, 200 + i * 80, 600, 50)
+            rect = pygame.Rect(
+                (screen_w - button_width) // 2,
+                start_y + i * (button_height + spacing),
+                button_width,
+                button_height
+            )
             self.rects.append(rect)
 
-            pygame.draw.rect(screen, (40, 40, 60), rect)
-            pygame.draw.rect(screen, (255, 255, 255), rect, 2)
+            pygame.draw.rect(screen, (40, 40, 60), rect, border_radius=12)
+            pygame.draw.rect(screen, (255, 255, 255), rect, 2, border_radius=12)
 
-            font = pygame.font.SysFont(None, 30)
-            text = font.render(label, True, (255, 255, 255))
+            text = self.font.render(label, True, (255, 255, 255))
             screen.blit(text, text.get_rect(center=rect.center))
