@@ -80,8 +80,10 @@ class DialogueState(GameState):
             if c.text == "Ask about the treasure":
                 if "felix_revealed_treasure" not in self.game.save_data.flags:
                     continue
-            if c.flag and c.flag in self.game.save_data.flags:
-                continue  # hide already purchased item
+            # If an option has been selected previously
+            flag = getattr(c, "flag", None) or getattr(c, "associated_flag", None)
+            if flag and flag in self.game.save_data.flags:
+                continue
             filtered.append(c)
 
 
