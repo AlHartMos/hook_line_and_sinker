@@ -25,7 +25,7 @@ class FishingState(GameState):
         # "choice" → the player chooses Release or Add to cooler
         self.phase = "reveal"
         self.phase_started_at = 0
-        self.reveal_duration_ms = 3000
+        self.reveal_duration_ms = 2000
 
         # Fonts are created once and reused.
         self.title_font = None
