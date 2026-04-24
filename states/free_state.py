@@ -227,21 +227,6 @@ class FreeState(GameState):
     # arrival conversation that should be shown.
     def update(self, dt):
         # Trigger valley intro when reaching 85 energy (only once)
-        from dialogues.location_starters.valley_starter import valley_intro_after_fish
-        if (
-            self.location is not None
-            and self.location.id == 2
-            and self.game.save_data.energy >= 85
-            and "valley_intro_played" not in self.game.save_data.flags
-        ):
-            self.game.save_data.flags.add("valley_intro_played")
-
-            self.game.save_data.pending_dialogue = {
-                "conversation": valley_intro_after_fish,
-                "start_node": "intro"
-            }
-
-            return  # IMPORTANT: stop further updates this frame
 
         # Only show overlay when in valley (or similar cases)
         if (
@@ -280,6 +265,22 @@ class FreeState(GameState):
                 )
             )
             return
+        
+        from dialogues.location_starters.valley_starter import valley_intro_after_fish
+        if (
+            self.location is not None
+            and self.location.id == 2
+            and self.game.save_data.energy >= 85
+            and "valley_intro_played" not in self.game.save_data.flags
+        ):
+            self.game.save_data.flags.add("valley_intro_played")
+
+            self.game.save_data.pending_dialogue = {
+                "conversation": valley_intro_after_fish,
+                "start_node": "intro"
+            }
+
+            return  # IMPORTANT: stop further updates this frame
         
         # If another state requested a system popup, show it now.
         if self.game.save_data.pending_popup is not None:
