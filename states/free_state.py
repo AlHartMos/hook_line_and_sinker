@@ -52,8 +52,6 @@ class FreeState(GameState):
             self.small_font = pygame.font.SysFont(None, 24)
 
     # This is a cleanup hook.
-    # FreeState does not need special cleanup right now, but the method stays
-    # here to keep the state interface consistent.
     def exit(self):
         # Remove overlay if it exists
         self.game.state_stack = [
