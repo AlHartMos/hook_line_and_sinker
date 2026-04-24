@@ -354,13 +354,6 @@ class FishingState(GameState):
                 image=self.catch_image
             )
 
-            # Only fish can be eaten.
-            if self.catch is not None and self.catch.isFish:
-                self._draw_button(screen, self.eat_button, "Eat")
-
-            self._draw_button(screen, self.release_button, "Release")
-            self._draw_button(screen, self.cooler_button, "Add to cooler")
-
     def _draw_background(self, screen):
         w, h = screen.get_size()
 
@@ -434,6 +427,10 @@ class FishingState(GameState):
     def _draw_button(self, screen, rect, label):
         pygame.draw.rect(screen, (40, 40, 60), rect, border_radius=12)
         pygame.draw.rect(screen, (255, 255, 255), rect, width=2, border_radius=12)
+
+        text = self.button_font.render(label, True, (255, 255, 255))
+        text_rect = text.get_rect(center=rect.center)
+        screen.blit(text, text_rect)
 
     def _safe_stat_value(self, values, mutation):
         # Returns the stat value for the current mutation level,
