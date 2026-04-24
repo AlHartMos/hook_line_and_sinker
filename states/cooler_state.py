@@ -414,7 +414,7 @@ class CoolerState(GameState):
             try:
                 img = self.game.load_image(image)
 
-                img_size = 200
+                img_size = 400
                 img_rect = pygame.Rect(
                     panel.centerx - img_size // 2,
                     panel.y + 80,
