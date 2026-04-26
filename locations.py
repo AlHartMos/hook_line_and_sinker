@@ -49,6 +49,17 @@ class Location:
         return np.random.choice([False, True], p=self.trash_fish_ratio)    
 
 # Defining the locations
+chapter_2 = Location(
+    6,
+    "Chapter 2 Soon!",
+    None,
+    None,
+    "assets/chapter_2_promo.png",
+    None,
+    None,
+    None
+)
+
 cave = Location(
     5, 
     "Cave", 
@@ -85,7 +96,7 @@ valley = Location(
     [0.6, 0.3, 0.1, 0.0, 0.0], 
     "assets/Foggy_Lake.png", #Just for now
     valley_start,
-    next_location=forest,
+    next_location=chapter_2, # to be changed to forest later
     next_location_flag="felix_done"
     )
 
