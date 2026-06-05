@@ -32,17 +32,17 @@ class Catchable():
 
 # Defining the different catchable items
 minnow = Catchable(
-    "Minnow", 
-    True, 
-    [
+    "Minnow", #name of the fish
+    True, #is a fish
+    [ #Images for different mutation levels
         "assets/minnow_0.png", 
         "assets/minnow_1.png", 
         "assets/minnow_2.png", 
         "assets/minnow_3.png", 
         "assets/minnow_4.png"
     ], 
-    [1, 1.5, 2, 3, 5], 
-    [0, 1, 2, 3, 4]
+    [1, 1.5, 2, 3, 5], #energy provided to player if eaten
+    [0, 1, 2, 3, 4] #mutation level provided to player if eaten
  )
 
 perch = Catchable(

@@ -101,18 +101,18 @@ valley = Location(
     )
 
 lake = Location(
-    1, 
-    "Lake", 
-    [0.3, 0.7], 
-    [0.8, 0.2, 0.0, 0.0, 0.0], 
-    "assets/Foggy_Lake.png", 
-    lake_start,
-    next_location=valley,
-    next_location_flag="three_fish_caught_lake"
+    1, #location id
+    "Lake", #name
+    [0.3, 0.7], #trash to fish ratio
+    [0.8, 0.2, 0.0, 0.0, 0.0], #fish mutation level chances
+    "assets/Foggy_Lake.png", #background image
+    lake_start, #starter dialogue
+    next_location=valley, #next location
+    next_location_flag="three_fish_caught_lake" #flag 
     )
 
 tutorial = Location(
-    0, 
+    0,
     "Tutorial", 
     [1.0, 0.0], 
     [1.0, 0.0, 0.0, 0.0, 0.0], 

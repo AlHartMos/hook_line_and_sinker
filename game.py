@@ -23,7 +23,7 @@ class Game:
         self.save_data = SaveData() # Get data for user
         self.npc_interactions_enabled = True # Allows for full NPC conversations, turned to False when actively in one
 
-        self.state_stack = [] # Allows for different states to be used simultaneously (good for popups)
+        self.state_stack = [] # Allows for different states to be used simultaneously
         self.push_state(FreeState(self)) # Starts the game in FreeState
 
     # Recieve top state to work with the current state easily

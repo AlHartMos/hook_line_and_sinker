@@ -26,3 +26,4 @@ hans = Npc("Hans", "assets/hans.png", hidden_name="???", reveal_flag="introduced
 felix = Npc("Felix", None, hidden_name="???", reveal_flag="introduced_felix")
 unknown = Npc("Stranger", None)
 player = Npc(None, None)
+
